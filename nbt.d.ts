@@ -19,7 +19,7 @@ export declare const tagTypes: {
     readonly intArray: 11;
     readonly longArray: 12;
 };
-export type tagTypes = typeof tagTypes;
+export type tagTypes = typeof tagTypes[keyof typeof tagTypes];
 /**
  * A mapping from NBT type numbers to type names.
 */
@@ -38,7 +38,7 @@ export declare const tagTypeNames: {
     11: "intArray";
     12: "longArray";
 };
-export type tagTypeNames = typeof tagTypeNames;
+export type tagTypeNames = typeof tagTypeNames[keyof typeof tagTypeNames];
 /**
  * In addition to the named writing methods documented below,
  * the same methods are indexed by the NBT type number as well,
@@ -95,27 +95,32 @@ export declare class Writer {
     /**
      * @param value a signed byte
     */
-    byte: (value: number) => this;
+    byte(value: number): this;
+    [tagTypes.byte]: typeof this.byte;
     /**
      * @param value an unsigned byte
     */
-    ubyte: (value: number) => this;
+    ubyte(value: number): this;
     /**
      * @param value a signed 16-bit integer
     */
-    short: (value: number) => this;
+    short(value: number): this;
+    [tagTypes.short]: typeof this.short;
     /**
      * @param value a signed 32-bit integer
     */
-    int: (value: number) => this;
+    int(value: number): this;
+    [tagTypes.int]: typeof this.int;
     /**
      * @param value a signed 32-bit float
     */
-    float: (value: number) => this;
+    float(value: number): this;
+    [tagTypes.float]: typeof this.float;
     /**
      * @param value a signed 64-bit float
     */
-    double: (value: number) => this;
+    double(value: number): this;
+    [tagTypes.double]: typeof this.double;
     /**
      * As JavaScript does not support 64-bit integers natively, this
      * method takes an array of two 32-bit integers that make up the
@@ -124,10 +129,15 @@ export declare class Writer {
      * @param value [upper, lower]
     */
     long(value: [number, number]): this;
+    [tagTypes.long]: typeof this.long;
     byteArray(value: Uint8Array): this;
+    [tagTypes.byteArray]: typeof this.byteArray;
     intArray(value: number[]): this;
+    [tagTypes.intArray]: typeof this.intArray;
     longArray(value: [number, number][]): this;
+    [tagTypes.longArray]: typeof this.longArray;
     string(value: string): this;
+    [tagTypes.string]: typeof this.string;
     /**
      * @param value.type the NBT type number
      * @param value.value an array of values
@@ -136,6 +146,7 @@ export declare class Writer {
         type: number;
         value: Array<any>;
     }): this;
+    [tagTypes.list]: typeof this.list;
     /**
      * @param value a key/value map
      * @param value.KEY.type the NBT type number
@@ -153,6 +164,7 @@ export declare class Writer {
             value: object;
         };
     }): this;
+    [tagTypes.compound]: typeof this.compound;
 }
 /**
  * In addition to the named writing methods documented below,
@@ -181,27 +193,32 @@ export declare class Reader {
     /**
      * @returns the read byte
     */
-    byte: () => number;
+    byte(): number;
+    [tagTypes.byte]: typeof this.byte;
     /**
      * @returns the read unsigned byte
     */
-    ubyte: () => number;
+    ubyte(): number;
     /**
      * @returns the read signed 16-bit short
     */
-    short: () => number;
+    short(): number;
+    [tagTypes.short]: typeof this.short;
     /**
      * @returns the read signed 32-bit integer
     */
-    int: () => number;
+    int(): number;
+    [tagTypes.int]: typeof this.int;
     /**
      * @returns the read signed 32-bit float
     */
-    float: () => number;
+    float(): number;
+    [tagTypes.float]: typeof this.float;
     /**
      * @returns the read signed 64-bit float
     */
-    double: () => number;
+    double(): number;
+    [tagTypes.double]: typeof this.double;
     /**
      * As JavaScript does not not natively support 64-bit
      * integers, the value is returned as an array of two
@@ -210,14 +227,17 @@ export declare class Reader {
      * @returns [upper, lower]
     */
     long(): [number, number];
+    [tagTypes.long]: typeof this.long;
     /**
      * @returns the read array
     */
     byteArray(): number[];
+    [tagTypes.byteArray]: typeof this.byteArray;
     /**
      * @returns the read array of 32-bit ints
     */
     intArray(): number[];
+    [tagTypes.intArray]: typeof this.intArray;
     /**
      * As JavaScript does not not natively support 64-bit
      * integers, the value is returned as an array of arrays of two
@@ -227,10 +247,12 @@ export declare class Reader {
      *     split into [upper, lower]
     */
     longArray(): [number, number][];
+    [tagTypes.longArray]: typeof this.longArray;
     /**
      * @returns the read string
     */
     string(): string;
+    [tagTypes.string]: typeof this.string;
     /**
      * @example
      * reader.list();
@@ -240,6 +262,7 @@ export declare class Reader {
         type: string;
         value: any[];
     };
+    [tagTypes.list]: typeof this.list;
     /**
      * @example
      * reader.compound();
@@ -252,6 +275,7 @@ export declare class Reader {
             value: any;
         };
     };
+    [tagTypes.compound]: typeof this.compound;
 }
 /**
  * @param value a named compound

@@ -44,18 +44,18 @@
 		'longArray': 12
 	} as const;
 
-	export type tagTypes = typeof tagTypes;
+	export type tagTypes = typeof tagTypes[keyof typeof tagTypes];
 
 	/**
 	 * A mapping from NBT type numbers to type names.
 	*/
 	export const tagTypeNames = {} as {
-    [P in tagTypes[keyof tagTypes]]: {
-        [K in keyof tagTypes]: tagTypes[K] extends P ? K : never
-    }[keyof tagTypes]
+    [P in typeof tagTypes[keyof typeof tagTypes]]: {
+        [K in keyof typeof tagTypes]: typeof tagTypes[K] extends P ? K : never;
+    }[keyof typeof tagTypes];
 	};
 
-	export type tagTypeNames = typeof tagTypeNames;
+	export type tagTypeNames = typeof tagTypeNames[keyof typeof tagTypeNames];
 
 	(function() {
 		for (var typeName in tagTypes) {
@@ -235,32 +235,62 @@
 			/**
 			 * @param value a signed byte
 			*/
-			byte: (value: number) => this = this.write.bind(this, 'Int8', 1);
+			byte(value: number): this {
+				this.write('Int8', 1, value);
+				return this;
+			}
+
+			declare [tagTypes.byte]: typeof this.byte;
 
 			/**
 			 * @param value an unsigned byte
 			*/
-			ubyte: (value: number) => this = this.write.bind(this, 'Uint8', 1);
+			ubyte(value: number): this {
+				this.write('Uint8', 1, value);
+				return this;
+			}
+
+			// declare [tagTypes.ubyte]: typeof this.ubyte;
 
 			/**
 			 * @param value a signed 16-bit integer
 			*/
-			short: (value: number) => this = this.write.bind(this, 'Int16', 2);
+			short(value: number): this {
+				this.write('Int16', 2, value);
+				return this;
+			}
+
+			declare [tagTypes.short]: typeof this.short;
 
 			/**
 			 * @param value a signed 32-bit integer
 			*/
-			int: (value: number) => this = this.write.bind(this, 'Int32', 4);
+			int(value: number): this {
+				this.write('Int32', 4, value);
+				return this;
+			}
+
+			declare [tagTypes.int]: typeof this.int;
 
 			/**
 			 * @param value a signed 32-bit float
 			*/
-			float: (value: number) => this = this.write.bind(this, 'Float32', 4);
+			float(value: number): this {
+				this.write('Float32', 4, value);
+				return this;
+			}
+
+			declare [tagTypes.float]: typeof this.float;
 
 			/**
 			 * @param value a signed 64-bit float
 			*/
-			double: (value: number) => this = this.write.bind(this, 'Float64', 8);
+			double(value: number): this {
+				this.write('Float64', 8, value);
+				return this;
+			}
+
+			declare [tagTypes.double]: typeof this.double;
 
 			/**
 			 * As JavaScript does not support 64-bit integers natively, this
@@ -275,6 +305,8 @@
 				return this;
 			};
 
+			declare [tagTypes.long]: typeof this.long;
+
 			byteArray(value: Uint8Array): this {
 				this.int(value.length);
 				this.accommodate(value.length);
@@ -282,6 +314,8 @@
 				this.offset += value.length;
 				return this;
 			};
+
+			declare [tagTypes.byteArray]: typeof this.byteArray;
 
 			intArray(value: number[]): this {
 				this.int(value.length);
@@ -292,6 +326,8 @@
 				return this;
 			};
 
+			declare [tagTypes.intArray]: typeof this.intArray;
+
 			longArray(value: [number,number][]): this {
 				this.int(value.length);
 				var i;
@@ -301,6 +337,8 @@
 				return this;
 			};
 
+			declare [tagTypes.longArray]: typeof this.longArray;
+
 			string(value: string): this {
 				var bytes = encodeUTF8(value);
 				this.short(bytes.length);
@@ -309,6 +347,8 @@
 				this.offset += bytes.length;
 				return this;
 			};
+
+			declare [tagTypes.string]: typeof this.string;
 
 			/**
 			 * @param value.type the NBT type number
@@ -325,6 +365,8 @@
 				}
 				return this;
 			};
+
+			declare [tagTypes.list]: typeof this.list;
 
 			/**
 			 * @param value a key/value map
@@ -348,6 +390,8 @@
 				this.byte(tagTypes.end);
 				return this;
 			}
+
+			declare [tagTypes.compound]: typeof this.compound;
 	};
 
 	/**
@@ -401,32 +445,56 @@
 			/**
 			 * @returns the read byte
 			*/
-			byte: () => number = this.read.bind(this, 'Int8', 1);
+			byte(): number {
+				return this.read('Int8', 1);
+			}
+
+			declare [tagTypes.byte]: typeof this.byte;
 
 			/**
 			 * @returns the read unsigned byte
 			*/
-			ubyte: () => number = this.read.bind(this, 'Uint8', 1);
+			ubyte(): number {
+				return this.read('Uint8', 1);
+			}
+
+			// declare [tagTypes.ubyte]: typeof this.ubyte;
 
 			/**
 			 * @returns the read signed 16-bit short
 			*/
-			short: () => number = this.read.bind(this, 'Int16', 2);
+			short(): number {
+				return this.read('Int16', 2);
+			}
+
+			declare [tagTypes.short]: typeof this.short;
 
 			/**
 			 * @returns the read signed 32-bit integer
 			*/
-			int: () => number = this.read.bind(this, 'Int32', 4);
+			int(): number {
+				return this.read('Int32', 4);
+			}
+
+			declare [tagTypes.int]: typeof this.int;
 
 			/**
 			 * @returns the read signed 32-bit float
 			*/
-			float: () => number = this.read.bind(this, 'Float32', 4);
+			float(): number {
+				return this.read('Float32', 4);
+			}
+
+			declare [tagTypes.float]: typeof this.float;
 
 			/**
 			 * @returns the read signed 64-bit float
 			*/
-			double: () => number = this.read.bind(this, 'Float64', 8);
+			double(): number {
+				return this.read('Float64', 8);
+			}
+
+			declare [tagTypes.double]: typeof this.double;
 
 			/**
 			 * As JavaScript does not not natively support 64-bit
@@ -438,6 +506,8 @@
 			long(): [number,number] {
 				return [this.int(), this.int()];
 			};
+
+			declare [tagTypes.long]: typeof this.long;
 
 			/**
 			 * @returns the read array
@@ -452,6 +522,8 @@
 				return bytes;
 			};
 
+			declare [tagTypes.byteArray]: typeof this.byteArray;
+
 			/**
 			 * @returns the read array of 32-bit ints
 			*/
@@ -464,6 +536,8 @@
 				}
 				return ints;
 			};
+
+			declare [tagTypes.intArray]: typeof this.intArray;
 
 			/**
 			 * As JavaScript does not not natively support 64-bit
@@ -483,6 +557,8 @@
 				return longs;
 			};
 
+			declare [tagTypes.longArray]: typeof this.longArray;
+
 			/**
 			 * @returns the read string
 			*/
@@ -493,6 +569,8 @@
 				this.offset += length;
 				return decodeUTF8(slice);
 			};
+
+			declare [tagTypes.string]: typeof this.string;
 
 			/**
 			 * @example
@@ -513,6 +591,8 @@
 					tagTypeNames[type],
 					value: values };
 			};
+
+			declare [tagTypes.list]: typeof this.list;
 
 			/**
 			 * @example
@@ -536,6 +616,7 @@
 				return values;
 			};
 
+			declare [tagTypes.compound]: typeof this.compound;
 	}
 
 	/**
