@@ -1,4 +1,3 @@
-/// <reference types="node" />
 /**
  * A mapping from type names to NBT type numbers.
  * {@link Writer} and {@link Reader}
@@ -59,10 +58,20 @@ export type tagTypeNames = typeof tagTypeNames;
  * writer.offset = 0;
  * writer.int(999);
  *
- * return writer.buffer; */
+ * return writer.buffer;
+*/
 export declare class Writer {
+    /**
+     * Will be resized (x2) on write if necessary.
+    */
     private buffer;
+    /**
+     * This is recreated when the buffer is.
+    */
     private dataView;
+    /**
+     * This is recreated when the buffer is.
+    */
     private arrayView;
     /**
      * The location in the buffer where bytes are written or read.
@@ -70,79 +79,74 @@ export declare class Writer {
      * The buffer will be resized when necessary.
     */
     private offset;
-    /** Ensures that the buffer is large enough to write `size` bytes
-    * at the current `this.offset`. */
+    /**
+     * Ensures that the buffer is large enough to write `size` bytes
+     * at the current `this.offset`.
+    */
     private accommodate;
     private write;
     /**
      * Returns the writen data as a slice from the internal buffer,
      * cutting off any padding at the end.
      *
-     * @returns a [0, offset] slice of the interal buffer */
+     * @returns a [0, offset] slice of the interal buffer
+    */
     getData(): ArrayBuffer;
     /**
-     * @param value - a signed byte
-     * @returns itself */
+     * @param value a signed byte
+    */
     byte: (value: number) => this;
     /**
-     * @param value - an unsigned byte
-     * @returns itself */
+     * @param value an unsigned byte
+    */
     ubyte: (value: number) => this;
     /**
-     * @param value - a signed 16-bit integer
-     * @returns itself */
+     * @param value a signed 16-bit integer
+    */
     short: (value: number) => this;
     /**
-     * @param value - a signed 32-bit integer
-     * @returns itself */
+     * @param value a signed 32-bit integer
+    */
     int: (value: number) => this;
     /**
-     * @param value - a signed 32-bit float
-     * @returns itself */
+     * @param value a signed 32-bit float
+    */
     float: (value: number) => this;
     /**
-     * @param value - a signed 64-bit float
-     * @returns itself */
+     * @param value a signed 64-bit float
+    */
     double: (value: number) => this;
     /**
      * As JavaScript does not support 64-bit integers natively, this
      * method takes an array of two 32-bit integers that make up the
      * upper and lower halves of the long.
      *
-     * @param value - [upper, lower]
-     * @returns itself */
+     * @param value [upper, lower]
+    */
     long(value: [number, number]): this;
-    /**
-     * @returns itself */
-    byteArray(value: number[] | Uint8Array | Buffer): this;
-    /**
-     * @returns itself */
+    byteArray(value: Uint8Array): this;
     intArray(value: number[]): this;
-    /**
-     * @returns itself */
     longArray(value: [number, number][]): this;
-    /**
-     * @returns itself */
     string(value: string): this;
     /**
-     * @param value.type - the NBT type number
-     * @param value.value - an array of values
-     * @returns itself */
+     * @param value.type the NBT type number
+     * @param value.value an array of values
+    */
     list(value: {
         type: number;
         value: Array<any>;
     }): this;
     /**
-     * @param value - a key/value map
-     * @param value.KEY.type - the NBT type number
-     * @param value.KEY.value - a value matching the type
-     * @returns itself
+     * @param value a key/value map
+     * @param value.KEY.type the NBT type number
+     * @param value.KEY.value a value matching the type
      *
      * @example
      * writer.compound({
      *     foo: { type: 'int', value: 12 },
      *     bar: { type: 'string', value: 'Hello, World!' }
-     * }); */
+     * });
+    */
     compound(value: {
         KEY: {
             type: string;
@@ -161,7 +165,8 @@ export declare class Writer {
  * var reader = new Reader(buf);
  * int x = reader.int();
  * int y = reader[3]();
- * int z = reader[tagTypes.int](); */
+ * int z = reader[tagTypes.int]();
+*/
 export declare class Reader {
     private buffer;
     private arrayView;
@@ -174,35 +179,44 @@ export declare class Reader {
     private offset;
     private read;
     /**
-     * @returns the read byte */
+     * @returns the read byte
+    */
     byte: () => number;
     /**
-     * @returns the read unsigned byte */
+     * @returns the read unsigned byte
+    */
     ubyte: () => number;
     /**
-     * @returns the read signed 16-bit short  */
+     * @returns the read signed 16-bit short
+    */
     short: () => number;
     /**
-     * @returns the read signed 32-bit integer */
+     * @returns the read signed 32-bit integer
+    */
     int: () => number;
     /**
-     * @returns the read signed 32-bit float */
+     * @returns the read signed 32-bit float
+    */
     float: () => number;
     /**
-     * @returns the read signed 64-bit float */
+     * @returns the read signed 64-bit float
+    */
     double: () => number;
     /**
      * As JavaScript does not not natively support 64-bit
      * integers, the value is returned as an array of two
      * 32-bit integers, the upper and the lower.
      *
-     * @returns [upper, lower] */
+     * @returns [upper, lower]
+    */
     long(): [number, number];
     /**
-     * @returns the read array */
+     * @returns the read array
+    */
     byteArray(): number[];
     /**
-     * @returns the read array of 32-bit ints */
+     * @returns the read array of 32-bit ints
+    */
     intArray(): number[];
     /**
      * As JavaScript does not not natively support 64-bit
@@ -210,15 +224,18 @@ export declare class Reader {
      * 32-bit integers, the upper and the lower.
      *
      * @returns the read array of 64-bit ints
-     *     split into [upper, lower] */
+     *     split into [upper, lower]
+    */
     longArray(): [number, number][];
     /**
-     * @returns the read string */
+     * @returns the read string
+    */
     string(): string;
     /**
      * @example
      * reader.list();
-     * // -> { type: 'string', values: ['foo', 'bar'] } */
+     * // -> { type: 'string', values: ['foo', 'bar'] }
+    */
     list(): {
         type: string;
         value: any[];
@@ -227,7 +244,8 @@ export declare class Reader {
      * @example
      * reader.compound();
      * // -> { foo: { type: int, value: 42 },
-     * //      bar: { type: string, value: 'Hello! }} */
+     * //      bar: { type: string, value: 'Hello! }}
+    */
     compound(): {
         [s: string]: {
             type: string;
@@ -236,9 +254,9 @@ export declare class Reader {
     };
 }
 /**
- * @param value - a named compound
- * @param value.name - the top-level name
- * @param value.value - a compound
+ * @param value a named compound
+ * @param value.name the top-level name
+ * @param value.value a compound
  *
  * @see {@link parseUncompressed}
  * @see {@link Writer.prototype.compound}
@@ -250,13 +268,14 @@ export declare class Reader {
  *         foo: { type: int, value: 42 },
  *         bar: { type: string, value: 'Hi!' }
  *     }
- * }); */
+ * });
+*/
 export declare function writeUncompressed(value: {
     name: string;
     value: object;
 }): ArrayBuffer;
 /**
- * @param data - an uncompressed NBT archive
+ * @param data an uncompressed NBT archive
  * @returns a named compound
  *
  * @see {@link parse}
@@ -266,7 +285,8 @@ export declare function writeUncompressed(value: {
  * readUncompressed(buf);
  * // -> { name: 'My Level',
  * //      value: { foo: { type: int, value: 42 },
- * //               bar: { type: string, value: 'Hi!' }}} */
+ * //               bar: { type: string, value: 'Hi!' }}}
+*/
 export declare function parseUncompressed(data: ArrayBuffer | Uint8Array): {
     name: string;
     value: {
@@ -274,9 +294,9 @@ export declare function parseUncompressed(data: ArrayBuffer | Uint8Array): {
     };
 };
 /**
- * @param result - a named compound
- * @param result.name - the top-level name
- * @param result.value - the top-level compound
+ * @param result a named compound
+ * @param result.name the top-level name
+ * @param result.value the top-level compound
 */
 type parseCallback = (error?: object | null, result?: {
     name: string;
@@ -292,7 +312,7 @@ type parseCallback = (error?: object | null, result?: {
  * compressed archives. It will be passed a Buffer if the type is
  * available, or an Uint8Array otherwise.
  *
- * @param data - gzipped or uncompressed data
+ * @param data gzipped or uncompressed data
  *
  * @see {@link parseUncompressed}
  * @see {@link Reader.prototype.compound}
@@ -304,6 +324,7 @@ type parseCallback = (error?: object | null, result?: {
  *     }
  *     console.log(result.name);
  *     console.log(result.value.foo);
- * }); */
+ * });
+*/
 export declare function parse(data: ArrayBuffer | Uint8Array, callback: parseCallback): void;
 export {};

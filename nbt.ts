@@ -128,8 +128,10 @@
 		return String.fromCharCode.apply(null, codepoints);
 	}
 
-	/** Not all environments, in particular PhantomJS, supply
-	   Uint8Array.slice() */
+	/**
+	 * Not all environments, in particular PhantomJS, supply
+	 * Uint8Array.slice()
+	*/
 	function sliceUint8Array(array: Uint8Array, begin?: number, end?: number): Uint8Array {
 		if ('slice' in array) {
 			return array.slice(begin, end);
@@ -157,13 +159,21 @@
 	 * writer.offset = 0;
 	 * writer.int(999);
 	 *
-	 * return writer.buffer; */
+	 * return writer.buffer;
+	*/
 	export class Writer {
-			/* Will be resized (x2) on write if necessary. */
+			/**
+			 * Will be resized (x2) on write if necessary.
+			*/
 			private buffer = new ArrayBuffer(1024);
 
-			/* These are recreated when the buffer is */
+			/**
+			 * This is recreated when the buffer is.
+			*/
 			private dataView = new DataView(this.buffer);
+			/**
+			 * This is recreated when the buffer is.
+			*/
 			private arrayView = new Uint8Array(this.buffer);
 
 			/**
@@ -173,8 +183,10 @@
 			*/
 			private offset = 0;
 
-			/** Ensures that the buffer is large enough to write `size` bytes
-			* at the current `this.offset`. */
+			/**
+			 * Ensures that the buffer is large enough to write `size` bytes
+			 * at the current `this.offset`.
+			*/
 			private accommodate(size: number): void {
 				var requiredLength = this.offset + size;
 				if (this.buffer.byteLength >= requiredLength) {
@@ -213,40 +225,41 @@
 			 * Returns the writen data as a slice from the internal buffer,
 			 * cutting off any padding at the end.
 			 *
-			 * @returns a [0, offset] slice of the interal buffer */
+			 * @returns a [0, offset] slice of the interal buffer
+			*/
 			getData(): ArrayBuffer {
 				this.accommodate(0); /* make sure the offset is inside the buffer */
 				return this.buffer.slice(0, this.offset);
 			};
 
 			/**
-			 * @param value - a signed byte
-			 * @returns itself */
+			 * @param value a signed byte
+			*/
 			byte: (value: number) => this = this.write.bind(this, 'Int8', 1);
 
 			/**
-			 * @param value - an unsigned byte
-			 * @returns itself */
+			 * @param value an unsigned byte
+			*/
 			ubyte: (value: number) => this = this.write.bind(this, 'Uint8', 1);
 
 			/**
-			 * @param value - a signed 16-bit integer
-			 * @returns itself */
+			 * @param value a signed 16-bit integer
+			*/
 			short: (value: number) => this = this.write.bind(this, 'Int16', 2);
 
 			/**
-			 * @param value - a signed 32-bit integer
-			 * @returns itself */
+			 * @param value a signed 32-bit integer
+			*/
 			int: (value: number) => this = this.write.bind(this, 'Int32', 4);
 
 			/**
-			 * @param value - a signed 32-bit float
-			 * @returns itself */
+			 * @param value a signed 32-bit float
+			*/
 			float: (value: number) => this = this.write.bind(this, 'Float32', 4);
 
 			/**
-			 * @param value - a signed 64-bit float
-			 * @returns itself */
+			 * @param value a signed 64-bit float
+			*/
 			double: (value: number) => this = this.write.bind(this, 'Float64', 8);
 
 			/**
@@ -254,17 +267,15 @@
 			 * method takes an array of two 32-bit integers that make up the
 			 * upper and lower halves of the long.
 			 *
-			 * @param value - [upper, lower]
-			 * @returns itself */
+			 * @param value [upper, lower]
+			*/
 			long(value: [number,number]): this {
 				this.int(value[0]);
 				this.int(value[1]);
 				return this;
 			};
 
-			/**
-			 * @returns itself */
-			byteArray(value: number[] | Uint8Array | Buffer): this {
+			byteArray(value: Uint8Array): this {
 				this.int(value.length);
 				this.accommodate(value.length);
 				this.arrayView.set(value, this.offset);
@@ -272,8 +283,6 @@
 				return this;
 			};
 
-			/**
-			 * @returns itself */
 			intArray(value: number[]): this {
 				this.int(value.length);
 				var i;
@@ -283,8 +292,6 @@
 				return this;
 			};
 
-			/**
-			 * @returns itself */
 			longArray(value: [number,number][]): this {
 				this.int(value.length);
 				var i;
@@ -294,8 +301,6 @@
 				return this;
 			};
 
-			/**
-			 * @returns itself */
 			string(value: string): this {
 				var bytes = encodeUTF8(value);
 				this.short(bytes.length);
@@ -306,9 +311,9 @@
 			};
 
 			/**
-			 * @param value.type - the NBT type number
-			 * @param value.value - an array of values
-			 * @returns itself */
+			 * @param value.type the NBT type number
+			 * @param value.value an array of values
+			*/
 			list(value: { type: number; value: Array<any>; }): this {
 				// @ts-expect-error
 				this.byte(tagTypes[value.type]);
@@ -322,16 +327,16 @@
 			};
 
 			/**
-			 * @param value - a key/value map
-			 * @param value.KEY.type - the NBT type number
-			 * @param value.KEY.value - a value matching the type
-			 * @returns itself
+			 * @param value a key/value map
+			 * @param value.KEY.type the NBT type number
+			 * @param value.KEY.value a value matching the type
 			 *
 			 * @example
 			 * writer.compound({
 			 *     foo: { type: 'int', value: 12 },
 			 *     bar: { type: 'string', value: 'Hello, World!' }
-			 * }); */
+			 * });
+			*/
 			compound(value: { KEY: { type: string; value: object; }; }): this {
 				Object.keys(value).map(key => {
 					// @ts-expect-error
@@ -356,7 +361,8 @@
 	 * var reader = new Reader(buf);
 	 * int x = reader.int();
 	 * int y = reader[3]();
-	 * int z = reader[tagTypes.int](); */
+	 * int z = reader[tagTypes.int]();
+	*/
 	export class Reader {
 		declare private buffer: ArrayBuffer | Uint8Array;
 		declare private arrayView: Uint8Array;
@@ -393,27 +399,33 @@
 			}
 
 			/**
-			 * @returns the read byte */
+			 * @returns the read byte
+			*/
 			byte: () => number = this.read.bind(this, 'Int8', 1);
 
 			/**
-			 * @returns the read unsigned byte */
+			 * @returns the read unsigned byte
+			*/
 			ubyte: () => number = this.read.bind(this, 'Uint8', 1);
 
 			/**
-			 * @returns the read signed 16-bit short  */
+			 * @returns the read signed 16-bit short
+			*/
 			short: () => number = this.read.bind(this, 'Int16', 2);
 
 			/**
-			 * @returns the read signed 32-bit integer */
+			 * @returns the read signed 32-bit integer
+			*/
 			int: () => number = this.read.bind(this, 'Int32', 4);
 
 			/**
-			 * @returns the read signed 32-bit float */
+			 * @returns the read signed 32-bit float
+			*/
 			float: () => number = this.read.bind(this, 'Float32', 4);
 
 			/**
-			 * @returns the read signed 64-bit float */
+			 * @returns the read signed 64-bit float
+			*/
 			double: () => number = this.read.bind(this, 'Float64', 8);
 
 			/**
@@ -421,13 +433,15 @@
 			 * integers, the value is returned as an array of two
 			 * 32-bit integers, the upper and the lower.
 			 *
-			 * @returns [upper, lower] */
+			 * @returns [upper, lower]
+			*/
 			long(): [number,number] {
 				return [this.int(), this.int()];
 			};
 
 			/**
-			 * @returns the read array */
+			 * @returns the read array
+			*/
 			byteArray(): number[] {
 				var length = this.int();
 				var bytes = [];
@@ -439,7 +453,8 @@
 			};
 
 			/**
-			 * @returns the read array of 32-bit ints */
+			 * @returns the read array of 32-bit ints
+			*/
 			intArray(): number[] {
 				var length = this.int();
 				var ints = [];
@@ -456,7 +471,8 @@
 			 * 32-bit integers, the upper and the lower.
 			 *
 			 * @returns the read array of 64-bit ints
-			 *     split into [upper, lower] */
+			 *     split into [upper, lower]
+			*/
 			longArray(): [number,number][] {
 				var length = this.int();
 				var longs = [];
@@ -468,7 +484,8 @@
 			};
 
 			/**
-			 * @returns the read string */
+			 * @returns the read string
+			*/
 			string(): string {
 				var length = this.short();
 				var slice = sliceUint8Array(this.arrayView, this.offset,
@@ -480,7 +497,8 @@
 			/**
 			 * @example
 			 * reader.list();
-			 * // -> { type: 'string', values: ['foo', 'bar'] } */
+			 * // -> { type: 'string', values: ['foo', 'bar'] }
+			*/
 			list(): { type: string; value: any[]; } {
 				var type = this.byte();
 				var length = this.int();
@@ -500,7 +518,8 @@
 			 * @example
 			 * reader.compound();
 			 * // -> { foo: { type: int, value: 42 },
-			 * //      bar: { type: string, value: 'Hello! }} */
+			 * //      bar: { type: string, value: 'Hello! }}
+			*/
 			compound(): { [s: string]: { type: string; value: any; }; } {
 				var values = {};
 				while (true) {
@@ -520,9 +539,9 @@
 	}
 
 	/**
-	 * @param value - a named compound
-	 * @param value.name - the top-level name
-	 * @param value.value - a compound
+	 * @param value a named compound
+	 * @param value.name the top-level name
+	 * @param value.value a compound
 	 *
 	 * @see {@link parseUncompressed}
 	 * @see {@link Writer.prototype.compound}
@@ -534,7 +553,8 @@
 	 *         foo: { type: int, value: 42 },
 	 *         bar: { type: string, value: 'Hi!' }
 	 *     }
-	 * }); */
+	 * });
+	*/
 	export function writeUncompressed(value: { name: string; value: object; }): ArrayBuffer {
 		if (!value) { throw new Error('Argument "value" is falsy'); }
 
@@ -549,7 +569,7 @@
 	};
 
 	/**
-	 * @param data - an uncompressed NBT archive
+	 * @param data an uncompressed NBT archive
 	 * @returns a named compound
 	 *
 	 * @see {@link parse}
@@ -559,7 +579,8 @@
 	 * readUncompressed(buf);
 	 * // -> { name: 'My Level',
 	 * //      value: { foo: { type: int, value: 42 },
-	 * //               bar: { type: string, value: 'Hi!' }}} */
+	 * //               bar: { type: string, value: 'Hi!' }}}
+	*/
 	export function parseUncompressed(data: ArrayBuffer | Uint8Array): { name: string; value: { [s: string]: Object; }; } {
 		if (!data) { throw new Error('Argument "data" is falsy'); }
 
@@ -577,9 +598,9 @@
 	};
 
 	/**
-	 * @param result - a named compound
-	 * @param result.name - the top-level name
-	 * @param result.value - the top-level compound
+	 * @param result a named compound
+	 * @param result.name the top-level name
+	 * @param result.value the top-level compound
 	*/
 	type parseCallback = (error?: object | null, result?: { name: string; value: any; } | null) => void;
 
@@ -593,7 +614,7 @@
 	 * compressed archives. It will be passed a Buffer if the type is
 	 * available, or an Uint8Array otherwise.
 	 *
-	 * @param data - gzipped or uncompressed data
+	 * @param data gzipped or uncompressed data
 	 *
 	 * @see {@link parseUncompressed}
 	 * @see {@link Reader.prototype.compound}
@@ -605,7 +626,8 @@
 	 *     }
 	 *     console.log(result.name);
 	 *     console.log(result.value.foo);
-	 * }); */
+	 * });
+	*/
 	export function parse(data: ArrayBuffer | Uint8Array, callback: parseCallback): void {
 		if (!data) { throw new Error('Argument "data" is falsy'); }
 
@@ -615,16 +637,20 @@
 			callback(new Error('NBT archive is compressed but zlib is not ' +
 				'available'), null);
 		} else {
-			/* zlib.gunzip take a Buffer, at least in Node, so try to convert
-			   if possible. */
+			/**
+			 * zlib.gunzip take a Buffer, at least in Node, so try to convert
+			 * if possible.
+			*/
 			var buffer: Uint8Array;
 			if ("length" in data) {
 				buffer = data;
 			} else if (typeof Buffer !== 'undefined') {
 				buffer = new Buffer(data);
 			} else {
-				/* In the browser? Unknown zlib library. Let's settle for
-				   Uint8Array and see what happens. */
+				/**
+				 * In the browser? Unknown zlib library. Let's settle for
+				 * Uint8Array and see what happens.
+				*/
 				buffer = new Uint8Array(data);
 			}
 
