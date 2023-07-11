@@ -44,18 +44,22 @@
 		'longArray': 12
 	} as const;
 
-	export type tagTypes = typeof tagTypes[keyof typeof tagTypes];
+	export type tagTypes = typeof tagTypes;
+
+	export type TagType = tagTypes[keyof tagTypes];
 
 	/**
 	 * A mapping from NBT type numbers to type names.
 	*/
 	export const tagTypeNames = {} as {
-    [P in typeof tagTypes[keyof typeof tagTypes]]: {
-        [K in keyof typeof tagTypes]: typeof tagTypes[K] extends P ? K : never;
-    }[keyof typeof tagTypes];
+    [P in tagTypes[keyof tagTypes]]: {
+        [K in keyof tagTypes]: tagTypes[K] extends P ? K : never;
+    }[keyof tagTypes];
 	};
 
-	export type tagTypeNames = typeof tagTypeNames[keyof typeof tagTypeNames];
+	export type tagTypeNames = typeof tagTypeNames;
+
+	export type TagTypeName = tagTypeNames[keyof tagTypeNames];
 
 	(function() {
 		for (var typeName in tagTypes) {
@@ -138,6 +142,75 @@
 		} else {
 			return new Uint8Array([].slice.call(array, begin, end));
 		}
+	}
+
+	export interface RootTag {
+		name: string;
+		value: CompoundTag["value"];
+	}
+
+	export type Tag = ByteTag | ShortTag | IntTag | LongTag | FloatTag | DoubleTag | ByteArrayTag | ListTag;
+
+	export interface ByteTag {
+		type: tagTypeNames[tagTypes["byte"]];
+		value: number;
+	}
+
+	export interface ShortTag {
+		type: tagTypeNames[tagTypes["short"]];
+		value: number;
+	}
+
+	export interface IntTag {
+		type: tagTypeNames[tagTypes["int"]];
+		value: number;
+	}
+
+	export interface LongTag {
+		type: tagTypeNames[tagTypes["long"]];
+		value: [number,number];
+	}
+
+	export interface FloatTag {
+		type: tagTypeNames[tagTypes["float"]];
+		value: number;
+	}
+
+	export interface DoubleTag {
+		type: tagTypeNames[tagTypes["double"]];
+		value: number;
+	}
+
+	export interface ByteArrayTag {
+		type: tagTypeNames[tagTypes["byteArray"]];
+		value: number[];
+	}
+
+	export interface StringTag {
+		type: tagTypeNames[tagTypes["string"]];
+		value: string;
+	}
+
+	export interface ListTag<T extends Tag = Tag> {
+		type: T["type"];
+		value: T[];
+	}
+
+	export interface CompoundTag {
+		type: tagTypeNames[tagTypes["compound"]];
+		value: {
+			[name: string]: Tag;
+		};
+	}
+
+	export interface IntArrayTag {
+		type: tagTypeNames[tagTypes["intArray"]];
+		value: number[];
+	}
+
+	export interface LongArrayTag {
+		type: tagTypeNames[tagTypes["longArray"]];
+		value: LongTag["value"][];
 	}
 
 	/**
@@ -235,7 +308,7 @@
 			/**
 			 * @param value a signed byte
 			*/
-			byte(value: number): this {
+			byte(value: ByteTag["value"]): this {
 				this.write('Int8', 1, value);
 				return this;
 			}
@@ -255,7 +328,7 @@
 			/**
 			 * @param value a signed 16-bit integer
 			*/
-			short(value: number): this {
+			short(value: ShortTag["value"]): this {
 				this.write('Int16', 2, value);
 				return this;
 			}
@@ -265,7 +338,7 @@
 			/**
 			 * @param value a signed 32-bit integer
 			*/
-			int(value: number): this {
+			int(value: IntTag["value"]): this {
 				this.write('Int32', 4, value);
 				return this;
 			}
@@ -275,7 +348,7 @@
 			/**
 			 * @param value a signed 32-bit float
 			*/
-			float(value: number): this {
+			float(value: FloatTag["value"]): this {
 				this.write('Float32', 4, value);
 				return this;
 			}
@@ -285,7 +358,7 @@
 			/**
 			 * @param value a signed 64-bit float
 			*/
-			double(value: number): this {
+			double(value: DoubleTag["value"]): this {
 				this.write('Float64', 8, value);
 				return this;
 			}
@@ -299,7 +372,7 @@
 			 *
 			 * @param value [upper, lower]
 			*/
-			long(value: [number,number]): this {
+			long(value: LongTag["value"]): this {
 				this.int(value[0]);
 				this.int(value[1]);
 				return this;
@@ -307,7 +380,7 @@
 
 			declare [tagTypes.long]: typeof this.long;
 
-			byteArray(value: Uint8Array): this {
+			byteArray(value: ByteArrayTag["value"]): this {
 				this.int(value.length);
 				this.accommodate(value.length);
 				this.arrayView.set(value, this.offset);
@@ -317,7 +390,7 @@
 
 			declare [tagTypes.byteArray]: typeof this.byteArray;
 
-			intArray(value: number[]): this {
+			intArray(value: IntArrayTag["value"]): this {
 				this.int(value.length);
 				var i;
 				for (i = 0; i < value.length; i++) {
@@ -328,7 +401,7 @@
 
 			declare [tagTypes.intArray]: typeof this.intArray;
 
-			longArray(value: [number,number][]): this {
+			longArray(value: LongArrayTag["value"]): this {
 				this.int(value.length);
 				var i;
 				for (i = 0; i < value.length; i++) {
@@ -339,7 +412,7 @@
 
 			declare [tagTypes.longArray]: typeof this.longArray;
 
-			string(value: string): this {
+			string(value: StringTag["value"]): this {
 				var bytes = encodeUTF8(value);
 				this.short(bytes.length);
 				this.accommodate(bytes.length);
@@ -354,9 +427,8 @@
 			 * @param value.type the NBT type number
 			 * @param value.value an array of values
 			*/
-			list(value: { type: number; value: Array<any>; }): this {
-				// @ts-expect-error
-				this.byte(tagTypes[value.type]);
+			list(value: ListTag): this {
+				this.byte(tagTypes[value.type as TagTypeName]);
 				this.int(value.value.length);
 				var i;
 				for (i = 0; i < value.value.length; i++) {
@@ -379,13 +451,11 @@
 			 *     bar: { type: 'string', value: 'Hello, World!' }
 			 * });
 			*/
-			compound(value: { KEY: { type: string; value: object; }; }): this {
+			compound(value: CompoundTag["value"]): this {
 				Object.keys(value).map(key => {
-					// @ts-expect-error
-					this.byte(tagTypes[value[key].type]);
+					this.byte(tagTypes[value[key].type as TagTypeName]);
 					this.string(key);
-					// @ts-expect-error
-					this[value[key].type](value[key].value);
+					this[value[key].type as Exclude<TagTypeName,"end">](value[key].value as Tag);
 				});
 				this.byte(tagTypes.end);
 				return this;
@@ -445,7 +515,7 @@
 			/**
 			 * @returns the read byte
 			*/
-			byte(): number {
+			byte(): ByteTag["value"] {
 				return this.read('Int8', 1);
 			}
 
@@ -463,7 +533,7 @@
 			/**
 			 * @returns the read signed 16-bit short
 			*/
-			short(): number {
+			short(): ShortTag["value"] {
 				return this.read('Int16', 2);
 			}
 
@@ -472,7 +542,7 @@
 			/**
 			 * @returns the read signed 32-bit integer
 			*/
-			int(): number {
+			int(): IntTag["value"] {
 				return this.read('Int32', 4);
 			}
 
@@ -481,7 +551,7 @@
 			/**
 			 * @returns the read signed 32-bit float
 			*/
-			float(): number {
+			float(): FloatTag["value"] {
 				return this.read('Float32', 4);
 			}
 
@@ -490,7 +560,7 @@
 			/**
 			 * @returns the read signed 64-bit float
 			*/
-			double(): number {
+			double(): DoubleTag["value"] {
 				return this.read('Float64', 8);
 			}
 
@@ -503,7 +573,7 @@
 			 *
 			 * @returns [upper, lower]
 			*/
-			long(): [number,number] {
+			long(): LongTag["value"] {
 				return [this.int(), this.int()];
 			};
 
@@ -527,7 +597,7 @@
 			/**
 			 * @returns the read array of 32-bit ints
 			*/
-			intArray(): number[] {
+			intArray(): IntArrayTag["value"] {
 				var length = this.int();
 				var ints = [];
 				var i;
@@ -547,7 +617,7 @@
 			 * @returns the read array of 64-bit ints
 			 *     split into [upper, lower]
 			*/
-			longArray(): [number,number][] {
+			longArray(): LongArrayTag["value"] {
 				var length = this.int();
 				var longs = [];
 				var i;
@@ -562,7 +632,7 @@
 			/**
 			 * @returns the read string
 			*/
-			string(): string {
+			string(): StringTag["value"] {
 				var length = this.short();
 				var slice = sliceUint8Array(this.arrayView, this.offset,
 					this.offset + length);
@@ -577,19 +647,15 @@
 			 * reader.list();
 			 * // -> { type: 'string', values: ['foo', 'bar'] }
 			*/
-			list(): { type: string; value: any[]; } {
-				var type = this.byte();
+			list(): ListTag {
+				var type = this.byte() as Exclude<TagType,0>;
 				var length = this.int();
-				var values = [];
-				var i;
+				var values: Tag[] = [];
+				var i: number;
 				for (i = 0; i < length; i++) {
-					// @ts-expect-error
-					values.push(this[type]());
+					values.push(this[type]() as Tag);
 				}
-				return { type:
-					// @ts-expect-error
-					tagTypeNames[type],
-					value: values };
+				return { type: tagTypeNames[type], value: values };
 			};
 
 			declare [tagTypes.list]: typeof this.list;
@@ -600,17 +666,15 @@
 			 * // -> { foo: { type: int, value: 42 },
 			 * //      bar: { type: string, value: 'Hello! }}
 			*/
-			compound(): { [s: string]: { type: string; value: any; }; } {
-				var values = {};
+			compound(): CompoundTag["value"] {
+				var values: CompoundTag["value"] = {};
 				while (true) {
-					var type = this.byte();
+					var type = this.byte() as TagType;
 					if (type === tagTypes.end) {
 						break;
 					}
 					var name = this.string();
-					// @ts-expect-error
 					var value = this[type]();
-					// @ts-expect-error
 					values[name] = { type: tagTypeNames[type], value: value };
 				}
 				return values;
@@ -636,14 +700,13 @@
 	 *     }
 	 * });
 	*/
-	export function writeUncompressed(value: { name: string; value: object; }): ArrayBuffer {
+	export function writeUncompressed(value: RootTag): ArrayBuffer {
 		if (!value) { throw new Error('Argument "value" is falsy'); }
 
 		var writer = new Writer();
 
 		writer.byte(tagTypes.compound);
 		writer.string(value.name);
-		// @ts-expect-error
 		writer.compound(value.value);
 
 		return writer.getData();
@@ -662,7 +725,7 @@
 	 * //      value: { foo: { type: int, value: 42 },
 	 * //               bar: { type: string, value: 'Hi!' }}}
 	*/
-	export function parseUncompressed(data: ArrayBuffer | Uint8Array): { name: string; value: { [s: string]: Object; }; } {
+	export function parseUncompressed(data: ArrayBuffer | Uint8Array): RootTag {
 		if (!data) { throw new Error('Argument "data" is falsy'); }
 
 		var reader = new Reader(data);
@@ -683,7 +746,7 @@
 	 * @param result.name the top-level name
 	 * @param result.value the top-level compound
 	*/
-	type parseCallback = (error?: object | null, result?: { name: string; value: any; } | null) => void;
+	type parseCallback = (error?: object | null, result?: RootTag | null) => void;
 
 	/**
 	 * This accepts both gzipped and uncompressd NBT archives.

@@ -19,7 +19,8 @@ export declare const tagTypes: {
     readonly intArray: 11;
     readonly longArray: 12;
 };
-export type tagTypes = typeof tagTypes[keyof typeof tagTypes];
+export type tagTypes = typeof tagTypes;
+export type TagType = tagTypes[keyof tagTypes];
 /**
  * A mapping from NBT type numbers to type names.
 */
@@ -38,7 +39,59 @@ export declare const tagTypeNames: {
     11: "intArray";
     12: "longArray";
 };
-export type tagTypeNames = typeof tagTypeNames[keyof typeof tagTypeNames];
+export type tagTypeNames = typeof tagTypeNames;
+export type TagTypeName = tagTypeNames[keyof tagTypeNames];
+export type Tag = ByteTag | ShortTag | IntTag | LongTag | FloatTag | DoubleTag | ByteArrayTag | ListTag;
+export interface ByteTag {
+    type: tagTypeNames[tagTypes["byte"]];
+    value: number;
+}
+export interface ShortTag {
+    type: tagTypeNames[tagTypes["short"]];
+    value: number;
+}
+export interface IntTag {
+    type: tagTypeNames[tagTypes["int"]];
+    value: number;
+}
+export interface LongTag {
+    type: tagTypeNames[tagTypes["long"]];
+    value: [number, number];
+}
+export interface FloatTag {
+    type: tagTypeNames[tagTypes["float"]];
+    value: number;
+}
+export interface DoubleTag {
+    type: tagTypeNames[tagTypes["double"]];
+    value: number;
+}
+export interface ByteArrayTag {
+    type: tagTypeNames[tagTypes["byteArray"]];
+    value: Uint8Array;
+}
+export interface StringTag {
+    type: tagTypeNames[tagTypes["string"]];
+    value: string;
+}
+export interface ListTag<T extends Tag = Tag> {
+    type: tagTypeNames[tagTypes["list"]];
+    value: T[];
+}
+export interface CompoundTag {
+    type: tagTypeNames[tagTypes["compound"]];
+    value: {
+        [name: string]: Tag;
+    };
+}
+export interface IntArrayTag {
+    type: tagTypeNames[tagTypes["intArray"]];
+    value: number[];
+}
+export interface LongArrayTag {
+    type: tagTypeNames[tagTypes["longArray"]];
+    value: LongTag["value"][];
+}
 /**
  * In addition to the named writing methods documented below,
  * the same methods are indexed by the NBT type number as well,
@@ -95,7 +148,7 @@ export declare class Writer {
     /**
      * @param value a signed byte
     */
-    byte(value: number): this;
+    byte(value: ByteTag["value"]): this;
     [tagTypes.byte]: typeof this.byte;
     /**
      * @param value an unsigned byte
@@ -104,22 +157,22 @@ export declare class Writer {
     /**
      * @param value a signed 16-bit integer
     */
-    short(value: number): this;
+    short(value: ShortTag["value"]): this;
     [tagTypes.short]: typeof this.short;
     /**
      * @param value a signed 32-bit integer
     */
-    int(value: number): this;
+    int(value: IntTag["value"]): this;
     [tagTypes.int]: typeof this.int;
     /**
      * @param value a signed 32-bit float
     */
-    float(value: number): this;
+    float(value: FloatTag["value"]): this;
     [tagTypes.float]: typeof this.float;
     /**
      * @param value a signed 64-bit float
     */
-    double(value: number): this;
+    double(value: DoubleTag["value"]): this;
     [tagTypes.double]: typeof this.double;
     /**
      * As JavaScript does not support 64-bit integers natively, this
@@ -128,24 +181,21 @@ export declare class Writer {
      *
      * @param value [upper, lower]
     */
-    long(value: [number, number]): this;
+    long(value: LongTag["value"]): this;
     [tagTypes.long]: typeof this.long;
-    byteArray(value: Uint8Array): this;
+    byteArray(value: ByteArrayTag["value"]): this;
     [tagTypes.byteArray]: typeof this.byteArray;
-    intArray(value: number[]): this;
+    intArray(value: IntArrayTag["value"]): this;
     [tagTypes.intArray]: typeof this.intArray;
-    longArray(value: [number, number][]): this;
+    longArray(value: LongArrayTag["value"]): this;
     [tagTypes.longArray]: typeof this.longArray;
-    string(value: string): this;
+    string(value: StringTag["value"]): this;
     [tagTypes.string]: typeof this.string;
     /**
      * @param value.type the NBT type number
      * @param value.value an array of values
     */
-    list(value: {
-        type: number;
-        value: Array<any>;
-    }): this;
+    list(value: ListTag): this;
     [tagTypes.list]: typeof this.list;
     /**
      * @param value a key/value map
@@ -158,12 +208,7 @@ export declare class Writer {
      *     bar: { type: 'string', value: 'Hello, World!' }
      * });
     */
-    compound(value: {
-        KEY: {
-            type: string;
-            value: object;
-        };
-    }): this;
+    compound(value: CompoundTag): this;
     [tagTypes.compound]: typeof this.compound;
 }
 /**
@@ -193,7 +238,7 @@ export declare class Reader {
     /**
      * @returns the read byte
     */
-    byte(): number;
+    byte(): ByteTag["value"];
     [tagTypes.byte]: typeof this.byte;
     /**
      * @returns the read unsigned byte
@@ -202,22 +247,22 @@ export declare class Reader {
     /**
      * @returns the read signed 16-bit short
     */
-    short(): number;
+    short(): ShortTag["value"];
     [tagTypes.short]: typeof this.short;
     /**
      * @returns the read signed 32-bit integer
     */
-    int(): number;
+    int(): IntTag["value"];
     [tagTypes.int]: typeof this.int;
     /**
      * @returns the read signed 32-bit float
     */
-    float(): number;
+    float(): FloatTag["value"];
     [tagTypes.float]: typeof this.float;
     /**
      * @returns the read signed 64-bit float
     */
-    double(): number;
+    double(): DoubleTag["value"];
     [tagTypes.double]: typeof this.double;
     /**
      * As JavaScript does not not natively support 64-bit
@@ -226,17 +271,17 @@ export declare class Reader {
      *
      * @returns [upper, lower]
     */
-    long(): [number, number];
+    long(): LongTag["value"];
     [tagTypes.long]: typeof this.long;
     /**
      * @returns the read array
     */
-    byteArray(): number[];
+    byteArray(): ByteArrayTag["value"];
     [tagTypes.byteArray]: typeof this.byteArray;
     /**
      * @returns the read array of 32-bit ints
     */
-    intArray(): number[];
+    intArray(): IntArrayTag["value"];
     [tagTypes.intArray]: typeof this.intArray;
     /**
      * As JavaScript does not not natively support 64-bit
@@ -246,22 +291,19 @@ export declare class Reader {
      * @returns the read array of 64-bit ints
      *     split into [upper, lower]
     */
-    longArray(): [number, number][];
+    longArray(): LongArrayTag["value"];
     [tagTypes.longArray]: typeof this.longArray;
     /**
      * @returns the read string
     */
-    string(): string;
+    string(): StringTag["value"];
     [tagTypes.string]: typeof this.string;
     /**
      * @example
      * reader.list();
      * // -> { type: 'string', values: ['foo', 'bar'] }
     */
-    list(): {
-        type: string;
-        value: any[];
-    };
+    list(): ListTag["value"];
     [tagTypes.list]: typeof this.list;
     /**
      * @example
@@ -269,12 +311,7 @@ export declare class Reader {
      * // -> { foo: { type: int, value: 42 },
      * //      bar: { type: string, value: 'Hello! }}
     */
-    compound(): {
-        [s: string]: {
-            type: string;
-            value: any;
-        };
-    };
+    compound(): CompoundTag["value"];
     [tagTypes.compound]: typeof this.compound;
 }
 /**
@@ -294,10 +331,7 @@ export declare class Reader {
  *     }
  * });
 */
-export declare function writeUncompressed(value: {
-    name: string;
-    value: object;
-}): ArrayBuffer;
+export declare function writeUncompressed(value: CompoundTag): ArrayBuffer;
 /**
  * @param data an uncompressed NBT archive
  * @returns a named compound
@@ -311,21 +345,13 @@ export declare function writeUncompressed(value: {
  * //      value: { foo: { type: int, value: 42 },
  * //               bar: { type: string, value: 'Hi!' }}}
 */
-export declare function parseUncompressed(data: ArrayBuffer | Uint8Array): {
-    name: string;
-    value: {
-        [s: string]: Object;
-    };
-};
+export declare function parseUncompressed(data: ArrayBuffer | Uint8Array): CompoundTag;
 /**
  * @param result a named compound
  * @param result.name the top-level name
  * @param result.value the top-level compound
 */
-type parseCallback = (error?: object | null, result?: {
-    name: string;
-    value: any;
-} | null) => void;
+type parseCallback = (error?: object | null, result?: CompoundTag | null) => void;
 /**
  * This accepts both gzipped and uncompressd NBT archives.
  * If the archive is uncompressed, the callback will be
