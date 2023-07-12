@@ -747,9 +747,10 @@
 	 * @param result.name the top-level name
 	 * @param result.value the top-level compound
 	*/
-	type parseCallback =
-		& ((error: Error, result: null) => void)
-		& ((error: null, result: RootTag) => void);
+	type parseCallback = {
+		(error: Error, result: null): void;
+		(error: null, result: RootTag): void;
+	}
 
 	/**
 	 * This accepts both gzipped and uncompressd NBT archives.
