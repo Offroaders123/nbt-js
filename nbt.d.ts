@@ -358,7 +358,7 @@ export declare function parseUncompressed(data: ArrayBuffer | Uint8Array): RootT
  * @param result.name the top-level name
  * @param result.value the top-level compound
 */
-type parseCallback = (error?: object | null, result?: RootTag | null) => void;
+type parseCallback = ((error: Error, result: null) => void) & ((error: null, result: RootTag) => void);
 /**
  * This accepts both gzipped and uncompressd NBT archives.
  * If the archive is uncompressed, the callback will be

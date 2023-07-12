@@ -289,10 +289,9 @@
 				this.arrayView = newArrayView;
 			}
 
-		private write(dataType: string, size: number, value: any): this {
+			private write(dataType: 'Int8' | 'Uint8' | 'Int16' | 'Int32' | 'Float32' | 'Float64', size: number, value: any): this {
 				this.accommodate(size);
-				// @ts-expect-error - indexing again
-				this.dataView['set' + dataType](this.offset, value);
+				this.dataView[`set${dataType}`](this.offset, value);
 				this.offset += size;
 				return this;
 			}
@@ -493,12 +492,9 @@
 			this.arrayView = new Uint8Array(this.buffer);
 			this.dataView = new DataView(this.arrayView.buffer);
 
-			var typeName;
-			for (typeName in tagTypes) {
-				if (tagTypes.hasOwnProperty(typeName)) {
-					// @ts-expect-error
-					this[typeName] = this[tagTypes[typeName]];
-				}
+			for (const [base,alias] of Object.entries(tagTypes) as [TagTypeName,TagType][]){
+				// @ts-expect-error
+				this[alias] = this[base];
 			}
 		}
 
@@ -509,9 +505,8 @@
 			*/
 			private offset: number = 0;
 
-			private read(dataType: string, size: number): number {
-				// @ts-expect-error
-				var val = dataView['get' + dataType](this.offset);
+			private read(dataType: 'Int8' | 'Uint8' | 'Int16' | 'Int32' | 'Float32' | 'Float64', size: number): number {
+				var val = this.dataView[`get${dataType}`](this.offset);
 				this.offset += size;
 				return val;
 			}
@@ -752,7 +747,9 @@
 	 * @param result.name the top-level name
 	 * @param result.value the top-level compound
 	*/
-	type parseCallback = (error?: object | null, result?: RootTag | null) => void;
+	type parseCallback =
+		& ((error: Error, result: null) => void)
+		& ((error: null, result: RootTag) => void);
 
 	/**
 	 * This accepts both gzipped and uncompressd NBT archives.
