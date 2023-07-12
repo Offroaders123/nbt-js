@@ -192,8 +192,11 @@
 	}
 
 	export interface ListTag<T extends Tag = Tag> {
-		type: T["type"];
-		value: T[];
+		type: tagTypeNames[tagTypes["list"]];
+		value: {
+			type: T["type"],
+			value: T["value"][]
+		};
 	}
 
 	export interface CompoundTag {
@@ -427,8 +430,8 @@
 			 * @param value.type the NBT type number
 			 * @param value.value an array of values
 			*/
-			list(value: ListTag): this {
-				this.byte(tagTypes[value.type as TagTypeName]);
+			list(value: ListTag["value"]): this {
+				this.byte(tagTypes[value.type]);
 				this.int(value.value.length);
 				var i;
 				for (i = 0; i < value.value.length; i++) {
@@ -455,6 +458,7 @@
 				Object.keys(value).map(key => {
 					this.byte(tagTypes[value[key].type as TagTypeName]);
 					this.string(key);
+					// @ts-expect-error
 					this[value[key].type as Exclude<TagTypeName,"end">](value[key].value as Tag);
 				});
 				this.byte(tagTypes.end);
@@ -647,14 +651,15 @@
 			 * reader.list();
 			 * // -> { type: 'string', values: ['foo', 'bar'] }
 			*/
-			list(): ListTag {
-				var type = this.byte() as Exclude<TagType,0>;
+			list(): ListTag["value"] {
+				var type = this.byte() as TagType;
 				var length = this.int();
-				var values: Tag[] = [];
+				var values: Tag["value"][] = [];
 				var i: number;
 				for (i = 0; i < length; i++) {
-					values.push(this[type]() as Tag);
+					values.push(this[type as Exclude<typeof type,0>]() as Tag["value"]);
 				}
+				// @ts-expect-error
 				return { type: tagTypeNames[type], value: values };
 			};
 
@@ -675,6 +680,7 @@
 					}
 					var name = this.string();
 					var value = this[type]();
+					// @ts-expect-error
 					values[name] = { type: tagTypeNames[type], value: value };
 				}
 				return values;

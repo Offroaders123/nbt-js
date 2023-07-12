@@ -41,6 +41,10 @@ export declare const tagTypeNames: {
 };
 export type tagTypeNames = typeof tagTypeNames;
 export type TagTypeName = tagTypeNames[keyof tagTypeNames];
+export interface RootTag {
+    name: string;
+    value: CompoundTag["value"];
+}
 export type Tag = ByteTag | ShortTag | IntTag | LongTag | FloatTag | DoubleTag | ByteArrayTag | ListTag;
 export interface ByteTag {
     type: tagTypeNames[tagTypes["byte"]];
@@ -68,7 +72,7 @@ export interface DoubleTag {
 }
 export interface ByteArrayTag {
     type: tagTypeNames[tagTypes["byteArray"]];
-    value: Uint8Array;
+    value: number[];
 }
 export interface StringTag {
     type: tagTypeNames[tagTypes["string"]];
@@ -76,7 +80,10 @@ export interface StringTag {
 }
 export interface ListTag<T extends Tag = Tag> {
     type: tagTypeNames[tagTypes["list"]];
-    value: T[];
+    value: {
+        type: T["type"];
+        value: T["value"][];
+    };
 }
 export interface CompoundTag {
     type: tagTypeNames[tagTypes["compound"]];
@@ -195,7 +202,7 @@ export declare class Writer {
      * @param value.type the NBT type number
      * @param value.value an array of values
     */
-    list(value: ListTag): this;
+    list(value: ListTag["value"]): this;
     [tagTypes.list]: typeof this.list;
     /**
      * @param value a key/value map
@@ -208,7 +215,7 @@ export declare class Writer {
      *     bar: { type: 'string', value: 'Hello, World!' }
      * });
     */
-    compound(value: CompoundTag): this;
+    compound(value: CompoundTag["value"]): this;
     [tagTypes.compound]: typeof this.compound;
 }
 /**
@@ -276,7 +283,7 @@ export declare class Reader {
     /**
      * @returns the read array
     */
-    byteArray(): ByteArrayTag["value"];
+    byteArray(): number[];
     [tagTypes.byteArray]: typeof this.byteArray;
     /**
      * @returns the read array of 32-bit ints
@@ -331,7 +338,7 @@ export declare class Reader {
  *     }
  * });
 */
-export declare function writeUncompressed(value: CompoundTag): ArrayBuffer;
+export declare function writeUncompressed(value: RootTag): ArrayBuffer;
 /**
  * @param data an uncompressed NBT archive
  * @returns a named compound
@@ -345,13 +352,13 @@ export declare function writeUncompressed(value: CompoundTag): ArrayBuffer;
  * //      value: { foo: { type: int, value: 42 },
  * //               bar: { type: string, value: 'Hi!' }}}
 */
-export declare function parseUncompressed(data: ArrayBuffer | Uint8Array): CompoundTag;
+export declare function parseUncompressed(data: ArrayBuffer | Uint8Array): RootTag;
 /**
  * @param result a named compound
  * @param result.name the top-level name
  * @param result.value the top-level compound
 */
-type parseCallback = (error?: object | null, result?: CompoundTag | null) => void;
+type parseCallback = (error?: object | null, result?: RootTag | null) => void;
 /**
  * This accepts both gzipped and uncompressd NBT archives.
  * If the archive is uncompressed, the callback will be
