@@ -10,6 +10,8 @@
 	required by law.
 */
 
+export namespace nbt {
+
 	if (typeof ArrayBuffer === 'undefined') {
 		throw new Error('Missing required type ArrayBuffer');
 	}
@@ -20,7 +22,7 @@
 		throw new Error('Missing required type Uint8Array');
 	}
 
-	var zlib = typeof require !== 'undefined' ? require('zlib') as typeof window.zlib : window.zlib;
+	var zlib: typeof import("node:zlib") = typeof require !== 'undefined' ? require('zlib') : window.zlib;
 
 	/**
 	 * A mapping from type names to NBT type numbers.
@@ -811,3 +813,4 @@
 			});
 		}
 	};
+};

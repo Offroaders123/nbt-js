@@ -1,10 +1,11 @@
+export declare namespace nbt {
 /**
  * A mapping from type names to NBT type numbers.
  * {@link Writer} and {@link Reader}
  * have correspoding methods (e.g. {@link Writer.prototype.int})
  * for every type.
 */
-export declare const tagTypes: {
+export const tagTypes: {
     readonly end: 0;
     readonly byte: 1;
     readonly short: 2;
@@ -24,7 +25,7 @@ export type TagType = tagTypes[keyof tagTypes];
 /**
  * A mapping from NBT type numbers to type names.
 */
-export declare const tagTypeNames: {
+export const tagTypeNames: {
     0: "end";
     1: "byte";
     2: "short";
@@ -120,7 +121,7 @@ export interface LongArrayTag {
  *
  * return writer.buffer;
 */
-export declare class Writer {
+export class Writer {
     /**
      * Will be resized (x2) on write if necessary.
     */
@@ -231,7 +232,7 @@ export declare class Writer {
  * int y = reader[3]();
  * int z = reader[tagTypes.int]();
 */
-export declare class Reader {
+export class Reader {
     private buffer;
     private arrayView;
     private dataView;
@@ -338,7 +339,7 @@ export declare class Reader {
  *     }
  * });
 */
-export declare function writeUncompressed(value: RootTag): ArrayBuffer;
+export function writeUncompressed(value: RootTag): ArrayBuffer;
 /**
  * @param data an uncompressed NBT archive
  * @returns a named compound
@@ -352,7 +353,7 @@ export declare function writeUncompressed(value: RootTag): ArrayBuffer;
  * //      value: { foo: { type: int, value: 42 },
  * //               bar: { type: string, value: 'Hi!' }}}
 */
-export declare function parseUncompressed(data: ArrayBuffer | Uint8Array): RootTag;
+export function parseUncompressed(data: ArrayBuffer | Uint8Array): RootTag;
 /**
  * @param result a named compound
  * @param result.name the top-level name
@@ -386,5 +387,6 @@ type parseCallback = {
  *     console.log(result.value.foo);
  * });
 */
-export declare function parse(data: ArrayBuffer | Uint8Array, callback: parseCallback): void;
+export function parse(data: ArrayBuffer | Uint8Array, callback: parseCallback): void;
 export {};
+}
