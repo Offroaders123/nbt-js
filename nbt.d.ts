@@ -46,7 +46,7 @@ export declare namespace nbt {
         name: string;
         value: CompoundTag["value"];
     }
-    export type Tag = ByteTag | ShortTag | IntTag | LongTag | FloatTag | DoubleTag | ByteArrayTag | ListTag;
+    export type Tag = ByteTag | ShortTag | IntTag | LongTag | FloatTag | DoubleTag | ByteArrayTag | StringTag | ListTag<Tag> | CompoundTag | IntArrayTag | LongArrayTag;
     export interface ByteTag {
         type: tagTypeNames[tagTypes["byte"]];
         value: number;
@@ -79,7 +79,7 @@ export declare namespace nbt {
         type: tagTypeNames[tagTypes["string"]];
         value: string;
     }
-    export interface ListTag<T extends Tag = Tag> {
+    export interface ListTag<T extends Tag> {
         type: tagTypeNames[tagTypes["list"]];
         value: {
             type: T["type"];
@@ -125,16 +125,17 @@ export declare namespace nbt {
      * return writer.buffer; */
     export class Writer {
         /** Will be resized (x2) on write if necessary. */
-        buffer: ArrayBuffer;
+        private buffer;
         /** This is recreated when the buffer is */
-        dataView: DataView;
+        private dataView;
         /** This is recreated when the buffer is */
-        arrayView: Uint8Array;
+        private arrayView;
         /**
          * The location in the buffer where bytes are written or read.
          * This increases after every write, but can be freely changed.
-         * The buffer will be resized when necessary.  */
-        offset: number;
+         * The buffer will be resized when necessary.
+        */
+        private offset;
         /**
          * Ensures that the buffer is large enough to write `size` bytes
          * at the current `self.offset`. */
@@ -221,8 +222,8 @@ export declare namespace nbt {
          * @param {number} value.type - the NBT type number
          * @param {Array} value.value - an array of values
          * @returns {module:nbt.Writer} itself */
-        [nbt.tagTypes.list](value: ListTag["value"]): this;
-        list: (value: ListTag["value"]) => this;
+        [nbt.tagTypes.list](value: ListTag<Tag>["value"]): this;
+        list: (value: ListTag<Tag>["value"]) => this;
         /**
          * @method module:nbt.Writer#compound
          * @param {Object} value - a key/value map
@@ -259,10 +260,10 @@ export declare namespace nbt {
         /**
          * The current location in the buffer. Can be freely changed
          * within the bounds of the buffer. */
-        offset: number;
-        buffer: ArrayBuffer | Uint8Array;
-        arrayView: Uint8Array;
-        dataView: DataView;
+        private offset;
+        private buffer;
+        private arrayView;
+        private dataView;
         read(dataType: ReaderDataType, size: number): number;
         /**
          * @method module:nbt.Reader#byte
@@ -334,8 +335,8 @@ export declare namespace nbt {
          * @example
          * reader.list();
          * // -> { type: 'string', values: ['foo', 'bar'] } */
-        [nbt.tagTypes.list](): ListTag["value"];
-        list: () => ListTag["value"];
+        [nbt.tagTypes.list](): ListTag<Tag>["value"];
+        list: () => ListTag<Tag>["value"];
         /**
          * @method module:nbt.Reader#compound
          * @returns {Object.<string, { type: string, value }>}
