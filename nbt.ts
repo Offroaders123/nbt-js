@@ -219,7 +219,7 @@ export namespace nbt {
 		value: LongTag["value"][];
 	}
 
-	type WriterDataType = {
+	export type WriterDataType = {
 		[K in keyof DataView]: K extends `set${infer T}` ? T extends `Big${string}` ? never : T : never;
 	}[keyof DataView];
 
@@ -460,6 +460,10 @@ export namespace nbt {
 		compound = this[tagTypes["compound"]];
 	};
 
+	export type ReaderDataType = {
+		[K in keyof DataView]: K extends `get${infer T}` ? T extends `Big${string}` ? never : T : never;
+	}[keyof DataView];
+
 	/**
 	 * In addition to the named writing methods documented below,
 	 * the same methods are indexed by the NBT type number as well,
@@ -473,208 +477,178 @@ export namespace nbt {
 	 * int y = reader[3]();
 	 * int z = reader[nbt.tagTypes.int](); */
 	export class Reader {
-		declare private buffer: ArrayBuffer | Uint8Array;
-		declare private arrayView: Uint8Array;
-		declare private dataView: DataView;
-
 		constructor(buffer: ArrayBuffer | Uint8Array) {
-			if (!buffer) { throw new Error('Argument "buffer" is falsy'); }
-
-			this.buffer = buffer;
-			this.arrayView = new Uint8Array(this.buffer);
-			this.dataView = new DataView(this.arrayView.buffer);
-
-			for (const [base,alias] of Object.entries(tagTypes) as [TagTypeName,TagType][]){
-				// @ts-expect-error
-				this[alias] = this[base];
-			}
+		if (!buffer) { throw new Error('Argument "buffer" is falsy'); }
+		this.buffer = buffer;
+		this.arrayView = new Uint8Array(this.buffer);
+		this.dataView = new DataView(this.arrayView.buffer);
 		}
 
+		/**
+		 * The current location in the buffer. Can be freely changed
+		 * within the bounds of the buffer. */
+		offset: number = 0;
 
-			/**
-			 * The current location in the buffer. Can be freely changed
-			 * within the bounds of the buffer.
-			*/
-			private offset: number = 0;
+		declare buffer: ArrayBuffer | Uint8Array;
+		declare arrayView: Uint8Array;
+		declare dataView: DataView;
 
-			private read(dataType: 'Int8' | 'Uint8' | 'Int16' | 'Int32' | 'Float32' | 'Float64', size: number): number {
-				var val = this.dataView[`get${dataType}`](this.offset);
-				this.offset += size;
-				return val;
+		read(dataType: ReaderDataType, size: number): number {
+			var val = this.dataView[`get${dataType}`](this.offset);
+			this.offset += size;
+			return val;
+		}
+
+		/**
+		 * @method module:nbt.Reader#byte
+		 * @returns {number} the read byte */
+		[nbt.tagTypes.byte] = this.read.bind(this, 'Int8', 1);
+		byte = this[tagTypes.byte];
+
+		/**
+		 * @method module:nbt.Reader#byte
+		 * @returns {number} the read unsigned byte */
+		ubyte = this.read.bind(this, 'Uint8', 1);
+
+		/**
+		 * @method module:nbt.Reader#short
+		 * @returns {number} the read signed 16-bit short  */
+		[nbt.tagTypes.short] = this.read.bind(this, 'Int16', 2);
+		short = this[tagTypes.short];
+
+		/**
+		 * @method module:nbt.Reader#int
+		 * @returns {number} the read signed 32-bit integer */
+		[nbt.tagTypes.int] = this.read.bind(this, 'Int32', 4);
+		int = this[tagTypes.int];
+
+		/**
+		 * @method module:nbt.Reader#float
+		 * @returns {number} the read signed 32-bit float */
+		[nbt.tagTypes.float] = this.read.bind(this, 'Float32', 4);
+		float = this[tagTypes.float];
+
+		/**
+		 * @method module:nbt.Reader#double
+		 * @returns {number} the read signed 64-bit float */
+		[nbt.tagTypes.double] = this.read.bind(this, 'Float64', 8);
+		double = this[tagTypes.double];
+
+		/**
+		 * As JavaScript does not not natively support 64-bit
+		 * integers, the value is returned as an array of two
+		 * 32-bit integers, the upper and the lower.
+		 *
+		 * @method module:nbt.Reader#long
+		 * @returns {Array.<number>} [upper, lower] */
+		[nbt.tagTypes.long](): LongTag["value"] {
+			return [this.int(), this.int()];
+		};
+		long = this[tagTypes.long];
+
+		/**
+		 * @method module:nbt.Reader#byteArray
+		 * @returns {Array.<number>} the read array */
+		[nbt.tagTypes.byteArray](): ByteArrayTag["value"] {
+			var length = this.int();
+			var bytes = [];
+			var i;
+			for (i = 0; i < length; i++) {
+				bytes.push(this.byte());
 			}
+			return bytes;
+		};
+		byteArray = this[tagTypes.byteArray];
 
-			/**
-			 * @returns the read byte
-			*/
-			byte(): ByteTag["value"] {
-				return this.read('Int8', 1);
+		/**
+		 * @method module:nbt.Reader#intArray
+		 * @returns {Array.<number>} the read array of 32-bit ints */
+		[nbt.tagTypes.intArray](): IntArrayTag["value"] {
+			var length = this.int();
+			var ints = [];
+			var i;
+			for (i = 0; i < length; i++) {
+				ints.push(this.int());
 			}
+			return ints;
+		};
+		intArray = this[tagTypes.intArray];
 
-			declare [tagTypes.byte]: typeof this.byte;
-
-			/**
-			 * @returns the read unsigned byte
-			*/
-			ubyte(): number {
-				return this.read('Uint8', 1);
+		/**
+		 * As JavaScript does not not natively support 64-bit
+		 * integers, the value is returned as an array of arrays of two
+		 * 32-bit integers, the upper and the lower.
+		 *
+		 * @method module:nbt.Reader#longArray
+		 * @returns {Array.<number>} the read array of 64-bit ints
+		 *     split into [upper, lower] */
+		[nbt.tagTypes.longArray](): LongArrayTag["value"] {
+			var length = this.int();
+			var longs = [];
+			var i;
+			for (i = 0; i < length; i++) {
+				longs.push(this.long());
 			}
+			return longs;
+		};
+		longArray = this[tagTypes.longArray];
 
-			// declare [tagTypes.ubyte]: typeof this.ubyte;
+		/**
+		 * @method module:nbt.Reader#string
+		 * @returns {string} the read string */
+		[nbt.tagTypes.string](): StringTag["value"] {
+			var length = this.short();
+			var slice = sliceUint8Array(this.arrayView, this.offset,
+				this.offset + length);
+			this.offset += length;
+			return decodeUTF8(slice);
+		};
+		string = this[tagTypes.string];
 
-			/**
-			 * @returns the read signed 16-bit short
-			*/
-			short(): ShortTag["value"] {
-				return this.read('Int16', 2);
+		/**
+		 * @method module:nbt.Reader#list
+		 * @returns {{type: string, value: Array}}
+		 *
+		 * @example
+		 * reader.list();
+		 * // -> { type: 'string', values: ['foo', 'bar'] } */
+		[nbt.tagTypes.list](): ListTag["value"] {
+			var type = this.byte() as TagType;
+			var length = this.int();
+			var values = [];
+			var i;
+			for (i = 0; i < length; i++) {
+				values.push(this[type as Exclude<TagType,tagTypes["end"]>]());
 			}
+			// @ts-expect-error
+			return { type: nbt.tagTypeNames[type], value: values };
+		};
+		list = this[tagTypes.list];
 
-			declare [tagTypes.short]: typeof this.short;
-
-			/**
-			 * @returns the read signed 32-bit integer
-			*/
-			int(): IntTag["value"] {
-				return this.read('Int32', 4);
-			}
-
-			declare [tagTypes.int]: typeof this.int;
-
-			/**
-			 * @returns the read signed 32-bit float
-			*/
-			float(): FloatTag["value"] {
-				return this.read('Float32', 4);
-			}
-
-			declare [tagTypes.float]: typeof this.float;
-
-			/**
-			 * @returns the read signed 64-bit float
-			*/
-			double(): DoubleTag["value"] {
-				return this.read('Float64', 8);
-			}
-
-			declare [tagTypes.double]: typeof this.double;
-
-			/**
-			 * As JavaScript does not not natively support 64-bit
-			 * integers, the value is returned as an array of two
-			 * 32-bit integers, the upper and the lower.
-			 *
-			 * @returns [upper, lower]
-			*/
-			long(): LongTag["value"] {
-				return [this.int(), this.int()];
-			};
-
-			declare [tagTypes.long]: typeof this.long;
-
-			/**
-			 * @returns the read array
-			*/
-			byteArray(): number[] {
-				var length = this.int();
-				var bytes = [];
-				var i;
-				for (i = 0; i < length; i++) {
-					bytes.push(this.byte());
-				}
-				return bytes;
-			};
-
-			declare [tagTypes.byteArray]: typeof this.byteArray;
-
-			/**
-			 * @returns the read array of 32-bit ints
-			*/
-			intArray(): IntArrayTag["value"] {
-				var length = this.int();
-				var ints = [];
-				var i;
-				for (i = 0; i < length; i++) {
-					ints.push(this.int());
-				}
-				return ints;
-			};
-
-			declare [tagTypes.intArray]: typeof this.intArray;
-
-			/**
-			 * As JavaScript does not not natively support 64-bit
-			 * integers, the value is returned as an array of arrays of two
-			 * 32-bit integers, the upper and the lower.
-			 *
-			 * @returns the read array of 64-bit ints
-			 *     split into [upper, lower]
-			*/
-			longArray(): LongArrayTag["value"] {
-				var length = this.int();
-				var longs = [];
-				var i;
-				for (i = 0; i < length; i++) {
-					longs.push(this.long());
-				}
-				return longs;
-			};
-
-			declare [tagTypes.longArray]: typeof this.longArray;
-
-			/**
-			 * @returns the read string
-			*/
-			string(): StringTag["value"] {
-				var length = this.short();
-				var slice = sliceUint8Array(this.arrayView, this.offset,
-					this.offset + length);
-				this.offset += length;
-				return decodeUTF8(slice);
-			};
-
-			declare [tagTypes.string]: typeof this.string;
-
-			/**
-			 * @example
-			 * reader.list();
-			 * // -> { type: 'string', values: ['foo', 'bar'] }
-			*/
-			list(): ListTag["value"] {
+		/**
+		 * @method module:nbt.Reader#compound
+		 * @returns {Object.<string, { type: string, value }>}
+		 *
+		 * @example
+		 * reader.compound();
+		 * // -> { foo: { type: int, value: 42 },
+		 * //      bar: { type: string, value: 'Hello! }} */
+		[nbt.tagTypes.compound](): CompoundTag["value"] {
+			var values: CompoundTag["value"] = {};
+			while (true) {
 				var type = this.byte() as TagType;
-				var length = this.int();
-				var values: Tag["value"][] = [];
-				var i: number;
-				for (i = 0; i < length; i++) {
-					values.push(this[type as Exclude<typeof type,0>]() as Tag["value"]);
+				if (type === nbt.tagTypes.end) {
+					break;
 				}
+				var name = this.string();
+				var value = this[type]();
 				// @ts-expect-error
-				return { type: tagTypeNames[type], value: values };
-			};
-
-			declare [tagTypes.list]: typeof this.list;
-
-			/**
-			 * @example
-			 * reader.compound();
-			 * // -> { foo: { type: int, value: 42 },
-			 * //      bar: { type: string, value: 'Hello! }}
-			*/
-			compound(): CompoundTag["value"] {
-				var values: CompoundTag["value"] = {};
-				while (true) {
-					var type = this.byte() as TagType;
-					if (type === tagTypes.end) {
-						break;
-					}
-					var name = this.string();
-					var value = this[type]();
-					// @ts-expect-error
-					values[name] = { type: tagTypeNames[type], value: value };
-				}
-				return values;
-			};
-
-			declare [tagTypes.compound]: typeof this.compound;
-	}
+				values[name] = { type: nbt.tagTypeNames[type], value: value };
+			}
+			return values;
+		};
+		compound = this[tagTypes.compound];
+	};
 
 	/**
 	 * @param value a named compound

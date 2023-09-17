@@ -100,6 +100,9 @@ export declare namespace nbt {
         type: tagTypeNames[tagTypes["longArray"]];
         value: LongTag["value"][];
     }
+    export type WriterDataType = {
+        [K in keyof DataView]: K extends `set${infer T}` ? T extends `Big${string}` ? never : T : never;
+    }[keyof DataView];
     /**
      * In addition to the named writing methods documented below,
      * the same methods are indexed by the NBT type number as well,
@@ -236,6 +239,9 @@ export declare namespace nbt {
         [nbt.tagTypes.compound](value: CompoundTag["value"]): this;
         compound: (value: CompoundTag["value"]) => this;
     }
+    export type ReaderDataType = {
+        [K in keyof DataView]: K extends `get${infer T}` ? T extends `Big${string}` ? never : T : never;
+    }[keyof DataView];
     /**
      * In addition to the named writing methods documented below,
      * the same methods are indexed by the NBT type number as well,
@@ -249,94 +255,97 @@ export declare namespace nbt {
      * int y = reader[3]();
      * int z = reader[nbt.tagTypes.int](); */
     export class Reader {
-        private buffer;
-        private arrayView;
-        private dataView;
         constructor(buffer: ArrayBuffer | Uint8Array);
         /**
          * The current location in the buffer. Can be freely changed
-         * within the bounds of the buffer.
-        */
-        private offset;
-        private read;
+         * within the bounds of the buffer. */
+        offset: number;
+        buffer: ArrayBuffer | Uint8Array;
+        arrayView: Uint8Array;
+        dataView: DataView;
+        read(dataType: ReaderDataType, size: number): number;
         /**
-         * @returns the read byte
-        */
-        byte(): ByteTag["value"];
-        [tagTypes.byte]: typeof this.byte;
+         * @method module:nbt.Reader#byte
+         * @returns {number} the read byte */
+        [nbt.tagTypes.byte]: () => number;
+        byte: () => number;
         /**
-         * @returns the read unsigned byte
-        */
-        ubyte(): number;
+         * @method module:nbt.Reader#byte
+         * @returns {number} the read unsigned byte */
+        ubyte: () => number;
         /**
-         * @returns the read signed 16-bit short
-        */
-        short(): ShortTag["value"];
-        [tagTypes.short]: typeof this.short;
+         * @method module:nbt.Reader#short
+         * @returns {number} the read signed 16-bit short  */
+        [nbt.tagTypes.short]: () => number;
+        short: () => number;
         /**
-         * @returns the read signed 32-bit integer
-        */
-        int(): IntTag["value"];
-        [tagTypes.int]: typeof this.int;
+         * @method module:nbt.Reader#int
+         * @returns {number} the read signed 32-bit integer */
+        [nbt.tagTypes.int]: () => number;
+        int: () => number;
         /**
-         * @returns the read signed 32-bit float
-        */
-        float(): FloatTag["value"];
-        [tagTypes.float]: typeof this.float;
+         * @method module:nbt.Reader#float
+         * @returns {number} the read signed 32-bit float */
+        [nbt.tagTypes.float]: () => number;
+        float: () => number;
         /**
-         * @returns the read signed 64-bit float
-        */
-        double(): DoubleTag["value"];
-        [tagTypes.double]: typeof this.double;
+         * @method module:nbt.Reader#double
+         * @returns {number} the read signed 64-bit float */
+        [nbt.tagTypes.double]: () => number;
+        double: () => number;
         /**
          * As JavaScript does not not natively support 64-bit
          * integers, the value is returned as an array of two
          * 32-bit integers, the upper and the lower.
          *
-         * @returns [upper, lower]
-        */
-        long(): LongTag["value"];
-        [tagTypes.long]: typeof this.long;
+         * @method module:nbt.Reader#long
+         * @returns {Array.<number>} [upper, lower] */
+        [nbt.tagTypes.long](): LongTag["value"];
+        long: () => LongTag["value"];
         /**
-         * @returns the read array
-        */
-        byteArray(): number[];
-        [tagTypes.byteArray]: typeof this.byteArray;
+         * @method module:nbt.Reader#byteArray
+         * @returns {Array.<number>} the read array */
+        [nbt.tagTypes.byteArray](): ByteArrayTag["value"];
+        byteArray: () => ByteArrayTag["value"];
         /**
-         * @returns the read array of 32-bit ints
-        */
-        intArray(): IntArrayTag["value"];
-        [tagTypes.intArray]: typeof this.intArray;
+         * @method module:nbt.Reader#intArray
+         * @returns {Array.<number>} the read array of 32-bit ints */
+        [nbt.tagTypes.intArray](): IntArrayTag["value"];
+        intArray: () => IntArrayTag["value"];
         /**
          * As JavaScript does not not natively support 64-bit
          * integers, the value is returned as an array of arrays of two
          * 32-bit integers, the upper and the lower.
          *
-         * @returns the read array of 64-bit ints
-         *     split into [upper, lower]
-        */
-        longArray(): LongArrayTag["value"];
-        [tagTypes.longArray]: typeof this.longArray;
+         * @method module:nbt.Reader#longArray
+         * @returns {Array.<number>} the read array of 64-bit ints
+         *     split into [upper, lower] */
+        [nbt.tagTypes.longArray](): LongArrayTag["value"];
+        longArray: () => LongArrayTag["value"];
         /**
-         * @returns the read string
-        */
-        string(): StringTag["value"];
-        [tagTypes.string]: typeof this.string;
+         * @method module:nbt.Reader#string
+         * @returns {string} the read string */
+        [nbt.tagTypes.string](): StringTag["value"];
+        string: () => StringTag["value"];
         /**
+         * @method module:nbt.Reader#list
+         * @returns {{type: string, value: Array}}
+         *
          * @example
          * reader.list();
-         * // -> { type: 'string', values: ['foo', 'bar'] }
-        */
-        list(): ListTag["value"];
-        [tagTypes.list]: typeof this.list;
+         * // -> { type: 'string', values: ['foo', 'bar'] } */
+        [nbt.tagTypes.list](): ListTag["value"];
+        list: () => ListTag["value"];
         /**
+         * @method module:nbt.Reader#compound
+         * @returns {Object.<string, { type: string, value }>}
+         *
          * @example
          * reader.compound();
          * // -> { foo: { type: int, value: 42 },
-         * //      bar: { type: string, value: 'Hello! }}
-        */
-        compound(): CompoundTag["value"];
-        [tagTypes.compound]: typeof this.compound;
+         * //      bar: { type: string, value: 'Hello! }} */
+        [nbt.tagTypes.compound](): CompoundTag["value"];
+        compound: () => CompoundTag["value"];
     }
     /**
      * @param value a named compound
