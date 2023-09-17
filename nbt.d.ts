@@ -125,17 +125,17 @@ export declare namespace nbt {
      * return writer.buffer; */
     export class Writer {
         /** Will be resized (x2) on write if necessary. */
-        private buffer;
+        buffer: ArrayBuffer;
         /** This is recreated when the buffer is */
-        private dataView;
+        dataView: DataView;
         /** This is recreated when the buffer is */
-        private arrayView;
+        arrayView: Uint8Array;
         /**
          * The location in the buffer where bytes are written or read.
          * This increases after every write, but can be freely changed.
          * The buffer will be resized when necessary.
         */
-        private offset;
+        offset: number;
         /**
          * Ensures that the buffer is large enough to write `size` bytes
          * at the current `self.offset`. */
@@ -260,10 +260,10 @@ export declare namespace nbt {
         /**
          * The current location in the buffer. Can be freely changed
          * within the bounds of the buffer. */
-        private offset;
-        private buffer;
-        private arrayView;
-        private dataView;
+        offset: number;
+        buffer: ArrayBuffer | Uint8Array;
+        arrayView: Uint8Array;
+        dataView: DataView;
         read(dataType: ReaderDataType, size: number): number;
         /**
          * @method module:nbt.Reader#byte

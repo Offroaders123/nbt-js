@@ -245,19 +245,19 @@ export namespace nbt {
 	 * return writer.buffer; */
 	export class Writer {
 		/** Will be resized (x2) on write if necessary. */
-		private buffer = new ArrayBuffer(1024);
+		buffer = new ArrayBuffer(1024);
 
 		/** This is recreated when the buffer is */
-		private dataView = new DataView(this.buffer);
+		dataView = new DataView(this.buffer);
 		/** This is recreated when the buffer is */
-		private arrayView = new Uint8Array(this.buffer);
+		arrayView = new Uint8Array(this.buffer);
 
 		/**
 		 * The location in the buffer where bytes are written or read.
 		 * This increases after every write, but can be freely changed.
 		 * The buffer will be resized when necessary.
 		*/
-		private offset: number = 0;
+		offset: number = 0;
 
 		/**
 		 * Ensures that the buffer is large enough to write `size` bytes
@@ -488,11 +488,11 @@ export namespace nbt {
 		/**
 		 * The current location in the buffer. Can be freely changed
 		 * within the bounds of the buffer. */
-		private offset = 0;
+		offset = 0;
 
-		declare private buffer: ArrayBuffer | Uint8Array;
-		declare private arrayView: Uint8Array;
-		declare private dataView: DataView;
+		declare buffer: ArrayBuffer | Uint8Array;
+		declare arrayView: Uint8Array;
+		declare dataView: DataView;
 
 		read(dataType: ReaderDataType, size: number): number {
 			var val = this.dataView[`get${dataType}`](this.offset);
