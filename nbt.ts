@@ -22,6 +22,9 @@ export namespace nbt {
 		throw new Error('Missing required type Uint8Array');
 	}
 
+	/** @exports nbt */
+
+	// var nbt = this;
 	var zlib: typeof import("node:zlib") = typeof require !== 'undefined' ? require('zlib') : window.zlib;
 
 	/**
@@ -787,24 +790,20 @@ export namespace nbt {
 			callback(new Error('NBT archive is compressed but zlib is not ' +
 				'available'), null);
 		} else {
-			/**
-			 * zlib.gunzip take a Buffer, at least in Node, so try to convert
-			 * if possible.
-			*/
-			var buffer: Uint8Array;
+			/* zlib.gunzip take a Buffer, at least in Node, so try to convert
+			   if possible. */
+			var buffer: Uint8Array | Buffer;
 			if ("length" in data) {
 				buffer = data;
 			} else if (typeof Buffer !== 'undefined') {
 				buffer = new Buffer(data);
 			} else {
-				/**
-				 * In the browser? Unknown zlib library. Let's settle for
-				 * Uint8Array and see what happens.
-				*/
+				/* In the browser? Unknown zlib library. Let's settle for
+				   Uint8Array and see what happens. */
 				buffer = new Uint8Array(data);
 			}
 
-			zlib.gunzip(buffer, function(error,uncompressed) {
+			zlib.gunzip(buffer, function(error, uncompressed) {
 				if (error) {
 					callback(error, null);
 				} else {
