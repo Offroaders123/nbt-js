@@ -152,7 +152,7 @@ export namespace nbt {
 		value: CompoundTag["value"];
 	}
 
-	export type Tag = ByteTag | ShortTag | IntTag | LongTag | FloatTag | DoubleTag | ByteArrayTag | ListTag;
+	export type Tag = ByteTag | ShortTag | IntTag | LongTag | FloatTag | DoubleTag | ByteArrayTag | StringTag | ListTag<Tag> | CompoundTag | IntArrayTag | LongArrayTag;
 
 	export interface ByteTag {
 		type: tagTypeNames[tagTypes["byte"]];
@@ -194,7 +194,7 @@ export namespace nbt {
 		value: string;
 	}
 
-	export interface ListTag<T extends Tag = Tag> {
+	export interface ListTag<T extends Tag> {
 		type: tagTypeNames[tagTypes["list"]];
 		value: {
 			type: T["type"],
@@ -219,7 +219,7 @@ export namespace nbt {
 		value: LongTag["value"][];
 	}
 
-	type WriterDataType = {
+	export type WriterDataType = {
 		[K in keyof DataView]: K extends `set${infer T}` ? T extends `Big${string}` ? never : T : never;
 	}[keyof DataView];
 
@@ -422,7 +422,7 @@ export namespace nbt {
 		 * @param {number} value.type - the NBT type number
 		 * @param {Array} value.value - an array of values
 		 * @returns {module:nbt.Writer} itself */
-		[nbt.tagTypes.list](value: ListTag["value"]): this {
+		[nbt.tagTypes.list](value: ListTag<Tag>["value"]): this {
 			this.byte(nbt.tagTypes[value.type]);
 			this.int(value.value.length);
 			var i;
@@ -461,7 +461,7 @@ export namespace nbt {
 		compound = this[tagTypes["compound"]];
 	};
 
-	type ReaderDataType = {
+	export type ReaderDataType = {
 		[K in keyof DataView]: K extends `get${infer T}` ? T extends `Big${string}` ? never : T : never;
 	}[keyof DataView];
 
@@ -613,16 +613,15 @@ export namespace nbt {
 		 * @example
 		 * reader.list();
 		 * // -> { type: 'string', values: ['foo', 'bar'] } */
-		[nbt.tagTypes.list](): ListTag["value"] {
+		[nbt.tagTypes.list](): ListTag<Tag>["value"] {
 			var type = this.byte() as TagType;
 			var length = this.int();
-			var values = [];
+			var values: ListTag<Tag>["value"]["value"] = [];
 			var i;
 			for (i = 0; i < length; i++) {
 				values.push(this[type as Exclude<TagType,tagTypes["end"]>]());
 			}
-			// @ts-expect-error
-			return { type: nbt.tagTypeNames[type], value: values };
+			return { type: nbt.tagTypeNames[type] as Exclude<TagTypeName,tagTypeNames["0"]>, value: values };
 		};
 		list = this[tagTypes.list];
 
