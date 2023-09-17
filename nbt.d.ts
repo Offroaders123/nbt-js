@@ -105,22 +105,21 @@ export declare namespace nbt {
      * the same methods are indexed by the NBT type number as well,
      * as shown in the example below.
      *
-     * @see {@link Reader}
+     * @see {@link nbt.Reader}
      *
      * @example
-     * var writer = new Writer();
+     * var writer = new nbt.Writer();
      *
      * // all equivalent
      * writer.int(42);
      * writer[3](42);
-     * writer(tagTypes.int)(42);
+     * writer(nbt.tagTypes.int)(42);
      *
      * // overwrite the second int
      * writer.offset = 0;
      * writer.int(999);
      *
-     * return writer.buffer;
-    */
+     * return writer.buffer; */
     export class Writer {
         /**
          * Will be resized (x2) on write if necessary.
@@ -224,14 +223,13 @@ export declare namespace nbt {
      * the same methods are indexed by the NBT type number as well,
      * as shown in the example below.
      *
-     * @see {@link Writer}
+     * @see {@link nbt.Writer}
      *
      * @example
-     * var reader = new Reader(buf);
+     * var reader = new nbt.Reader(buf);
      * int x = reader.int();
      * int y = reader[3]();
-     * int z = reader[tagTypes.int]();
-    */
+     * int z = reader[nbt.tagTypes.int](); */
     export class Reader {
         private buffer;
         private arrayView;

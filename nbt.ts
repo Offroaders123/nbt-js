@@ -22,7 +22,7 @@ export namespace nbt {
 		throw new Error('Missing required type Uint8Array');
 	}
 
-	/** @exports nbt */
+	// /** @exports nbt */
 
 	// var nbt = this;
 	var zlib: typeof import("node:zlib") = typeof require !== 'undefined' ? require('zlib') : window.zlib;
@@ -224,22 +224,21 @@ export namespace nbt {
 	 * the same methods are indexed by the NBT type number as well,
 	 * as shown in the example below.
 	 *
-	 * @see {@link Reader}
+	 * @see {@link nbt.Reader}
 	 *
 	 * @example
-	 * var writer = new Writer();
+	 * var writer = new nbt.Writer();
 	 *
 	 * // all equivalent
 	 * writer.int(42);
 	 * writer[3](42);
-	 * writer(tagTypes.int)(42);
+	 * writer(nbt.tagTypes.int)(42);
 	 *
 	 * // overwrite the second int
 	 * writer.offset = 0;
 	 * writer.int(999);
 	 *
-	 * return writer.buffer;
-	*/
+	 * return writer.buffer; */
 	export class Writer {
 			/**
 			 * Will be resized (x2) on write if necessary.
@@ -475,14 +474,13 @@ export namespace nbt {
 	 * the same methods are indexed by the NBT type number as well,
 	 * as shown in the example below.
 	 *
-	 * @see {@link Writer}
+	 * @see {@link nbt.Writer}
 	 *
 	 * @example
-	 * var reader = new Reader(buf);
+	 * var reader = new nbt.Reader(buf);
 	 * int x = reader.int();
 	 * int y = reader[3]();
-	 * int z = reader[tagTypes.int]();
-	*/
+	 * int z = reader[nbt.tagTypes.int](); */
 	export class Reader {
 		declare private buffer: ArrayBuffer | Uint8Array;
 		declare private arrayView: Uint8Array;
@@ -779,10 +777,10 @@ export namespace nbt {
 	export function parse(data: ArrayBuffer | Uint8Array, callback: parseCallback): void {
 		if (!data) { throw new Error('Argument "data" is falsy'); }
 
-		// var self = this;
+		var self = nbt;
 
 		if (!hasGzipHeader(data)) {
-			callback(null, parseUncompressed(data));
+			callback(null, self.parseUncompressed(data));
 		} else if (!zlib) {
 			callback(new Error('NBT archive is compressed but zlib is not ' +
 				'available'), null);
@@ -804,7 +802,7 @@ export namespace nbt {
 				if (error) {
 					callback(error, null);
 				} else {
-					callback(null, parseUncompressed(uncompressed));
+					callback(null, self.parseUncompressed(uncompressed));
 				}
 			});
 		}
