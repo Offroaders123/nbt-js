@@ -101,32 +101,32 @@
 	function decodeUTF8(array: Uint8Array): string {
 		var codepoints = [], i;
 		for (i = 0; i < array.length; i++) {
-			if ((array[i] & 0x80) === 0) {
-				codepoints.push(array[i] & 0x7F);
+			if ((array[i]! & 0x80) === 0) {
+				codepoints.push(array[i]! & 0x7F);
 			} else if (i+1 < array.length &&
-						(array[i]   & 0xE0) === 0xC0 &&
-						(array[i+1] & 0xC0) === 0x80) {
+						(array[i]!   & 0xE0) === 0xC0 &&
+						(array[i+1]! & 0xC0) === 0x80) {
 				codepoints.push(
-					((array[i]   & 0x1F) << 6) |
-					( array[i+1] & 0x3F));
+					((array[i]!   & 0x1F) << 6) |
+					( array[i+1]! & 0x3F));
 			} else if (i+2 < array.length &&
-						(array[i]   & 0xF0) === 0xE0 &&
-						(array[i+1] & 0xC0) === 0x80 &&
-						(array[i+2] & 0xC0) === 0x80) {
+						(array[i]!   & 0xF0) === 0xE0 &&
+						(array[i+1]! & 0xC0) === 0x80 &&
+						(array[i+2]! & 0xC0) === 0x80) {
 				codepoints.push(
-					((array[i]   & 0x0F) << 12) |
-					((array[i+1] & 0x3F) <<  6) |
-					( array[i+2] & 0x3F));
+					((array[i]!   & 0x0F) << 12) |
+					((array[i+1]! & 0x3F) <<  6) |
+					( array[i+2]! & 0x3F));
 			} else if (i+3 < array.length &&
-						(array[i]   & 0xF8) === 0xF0 &&
-						(array[i+1] & 0xC0) === 0x80 &&
-						(array[i+2] & 0xC0) === 0x80 &&
-						(array[i+3] & 0xC0) === 0x80) {
+						(array[i]!   & 0xF8) === 0xF0 &&
+						(array[i+1]! & 0xC0) === 0x80 &&
+						(array[i+2]! & 0xC0) === 0x80 &&
+						(array[i+3]! & 0xC0) === 0x80) {
 				codepoints.push(
-					((array[i]   & 0x07) << 18) |
-					((array[i+1] & 0x3F) << 12) |
-					((array[i+2] & 0x3F) <<  6) |
-					( array[i+3] & 0x3F));
+					((array[i]!   & 0x07) << 18) |
+					((array[i+1]! & 0x3F) << 12) |
+					((array[i+2]! & 0x3F) <<  6) |
+					( array[i+3]! & 0x3F));
 			}
 		}
 		return String.fromCharCode.apply(null, codepoints);
@@ -396,7 +396,7 @@
 				this.int(value.length);
 				var i;
 				for (i = 0; i < value.length; i++) {
-					this.int(value[i]);
+					this.int(value[i]!);
 				}
 				return this;
 			};
@@ -407,7 +407,7 @@
 				this.int(value.length);
 				var i;
 				for (i = 0; i < value.length; i++) {
-					this.long(value[i]);
+					this.long(value[i]!);
 				}
 				return this;
 			};
@@ -455,7 +455,7 @@
 			*/
 			compound(value: CompoundTag["value"]): this {
 				Object.keys(value).map(key => {
-					this.byte(tagTypes[value[key].type as TagTypeName]);
+					this.byte(tagTypes[value[key]!.type as TagTypeName]);
 					this.string(key);
 					// @ts-expect-error
 					this[value[key].type as Exclude<TagTypeName,"end">](value[key].value as Tag);
