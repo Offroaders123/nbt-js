@@ -1,8 +1,8 @@
 export declare namespace nbt {
     /**
      * A mapping from type names to NBT type numbers.
-     * {@link Writer} and {@link Reader}
-     * have correspoding methods (e.g. {@link Writer.prototype.int})
+     * {@link nbt.Writer} and {@link nbt.Reader}
+     * have correspoding methods (e.g. {@link nbt.Writer.prototype.int})
      * for every type.
     */
     export const tagTypes: {
@@ -27,18 +27,18 @@ export declare namespace nbt {
     */
     export const tagTypeNames: {
         0: "end";
-        2: "short";
         1: "byte";
+        2: "short";
         3: "int";
         4: "long";
-        8: "string";
         5: "float";
         6: "double";
-        10: "compound";
         7: "byteArray";
-        12: "longArray";
+        8: "string";
         9: "list";
+        10: "compound";
         11: "intArray";
+        12: "longArray";
     };
     export type tagTypeNames = typeof tagTypeNames;
     export type TagTypeName = tagTypeNames[keyof tagTypeNames];
@@ -327,32 +327,30 @@ export declare namespace nbt {
      * @param value.name the top-level name
      * @param value.value a compound
      *
-     * @see {@link parseUncompressed}
-     * @see {@link Writer.prototype.compound}
+     * @see {@link nbt.parseUncompressed}
+     * @see {@link nbt.Writer.prototype.compound}
      *
      * @example
-     * writeUncompressed({
+     * nbt.writeUncompressed({
      *     name: 'My Level',
      *     value: {
      *         foo: { type: int, value: 42 },
      *         bar: { type: string, value: 'Hi!' }
      *     }
-     * });
-    */
+     * }); */
     export function writeUncompressed(value: RootTag): ArrayBuffer;
     /**
      * @param data an uncompressed NBT archive
      * @returns a named compound
      *
-     * @see {@link parse}
-     * @see {@link writeUncompressed}
+     * @see {@link nbt.parse}
+     * @see {@link nbt.writeUncompressed}
      *
      * @example
-     * readUncompressed(buf);
+     * nbt.readUncompressed(buf);
      * // -> { name: 'My Level',
      * //      value: { foo: { type: int, value: 42 },
-     * //               bar: { type: string, value: 'Hi!' }}}
-    */
+     * //               bar: { type: string, value: 'Hi!' }}} */
     export function parseUncompressed(data: ArrayBuffer | Uint8Array): RootTag;
     /**
      * @param result a named compound
@@ -375,18 +373,17 @@ export declare namespace nbt {
      *
      * @param data gzipped or uncompressed data
      *
-     * @see {@link parseUncompressed}
-     * @see {@link Reader.prototype.compound}
+     * @see {@link nbt.parseUncompressed}
+     * @see {@link nbt.Reader.prototype.compound}
      *
      * @example
-     * parse(buf, function(error, results) {
+     * nbt.parse(buf, function(error, results) {
      *     if (error) {
      *         throw error;
      *     }
      *     console.log(result.name);
      *     console.log(result.value.foo);
-     * });
-    */
+     * }); */
     export function parse(data: ArrayBuffer | Uint8Array, callback: parseCallback): void;
     export {};
 }
