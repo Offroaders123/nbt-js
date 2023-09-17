@@ -219,7 +219,7 @@ export namespace nbt {
 		value: LongTag["value"][];
 	}
 
-	export type WriterDataType = {
+	type WriterDataType = {
 		[K in keyof DataView]: K extends `set${infer T}` ? T extends `Big${string}` ? never : T : never;
 	}[keyof DataView];
 
@@ -244,19 +244,20 @@ export namespace nbt {
 	 *
 	 * return writer.buffer; */
 	export class Writer {
-		/** Will be resized (x2) on write if necessary. */
-		buffer: ArrayBuffer = new ArrayBuffer(1024);
+		/* Will be resized (x2) on write if necessary. */
+		private buffer = new ArrayBuffer(1024);
 
-		/** This is recreated when the buffer is */
-		dataView: DataView = new DataView(this.buffer);
-		/** This is recreated when the buffer is */
-		arrayView: Uint8Array = new Uint8Array(this.buffer);
+		/* This is recreated when the buffer is */
+		private dataView = new DataView(this.buffer);
+		/* This is recreated when the buffer is */
+		private arrayView = new Uint8Array(this.buffer);
 
 		/**
 		 * The location in the buffer where bytes are written or read.
 		 * This increases after every write, but can be freely changed.
-		 * The buffer will be resized when necessary.  */
-		offset: number = 0;
+		 * The buffer will be resized when necessary.
+		*/
+		private offset: number = 0;
 
 		/**
 		 * Ensures that the buffer is large enough to write `size` bytes
@@ -460,7 +461,7 @@ export namespace nbt {
 		compound = this[tagTypes["compound"]];
 	};
 
-	export type ReaderDataType = {
+	type ReaderDataType = {
 		[K in keyof DataView]: K extends `get${infer T}` ? T extends `Big${string}` ? never : T : never;
 	}[keyof DataView];
 
@@ -487,7 +488,7 @@ export namespace nbt {
 		/**
 		 * The current location in the buffer. Can be freely changed
 		 * within the bounds of the buffer. */
-		offset: number = 0;
+		offset = 0;
 
 		declare buffer: ArrayBuffer | Uint8Array;
 		declare arrayView: Uint8Array;
