@@ -219,6 +219,10 @@ export namespace nbt {
 		value: LongTag["value"][];
 	}
 
+	type WriterDataType = {
+		[K in keyof DataView]: K extends `set${infer T}` ? T extends `Big${string}` ? never : T : never;
+	}[keyof DataView];
+
 	/**
 	 * In addition to the named writing methods documented below,
 	 * the same methods are indexed by the NBT type number as well,
@@ -240,233 +244,220 @@ export namespace nbt {
 	 *
 	 * return writer.buffer; */
 	export class Writer {
-			/**
-			 * Will be resized (x2) on write if necessary.
-			*/
-			private buffer = new ArrayBuffer(1024);
+		/** Will be resized (x2) on write if necessary. */
+		buffer: ArrayBuffer = new ArrayBuffer(1024);
 
-			/**
-			 * This is recreated when the buffer is.
-			*/
-			private dataView = new DataView(this.buffer);
-			/**
-			 * This is recreated when the buffer is.
-			*/
-			private arrayView = new Uint8Array(this.buffer);
+		/** This is recreated when the buffer is */
+		dataView: DataView = new DataView(this.buffer);
+		/** This is recreated when the buffer is */
+		arrayView: Uint8Array = new Uint8Array(this.buffer);
 
-			/**
-			 * The location in the buffer where bytes are written or read.
-			 * This increases after every write, but can be freely changed.
-			 * The buffer will be resized when necessary.
-			*/
-			private offset = 0;
+		/**
+		 * The location in the buffer where bytes are written or read.
+		 * This increases after every write, but can be freely changed.
+		 * The buffer will be resized when necessary.  */
+		offset: number = 0;
 
-			/**
-			 * Ensures that the buffer is large enough to write `size` bytes
-			 * at the current `this.offset`.
-			*/
-			private accommodate(size: number): void {
-				var requiredLength = this.offset + size;
-				if (this.buffer.byteLength >= requiredLength) {
-					return;
-				}
-
-				var newLength = this.buffer.byteLength;
-				while (newLength < requiredLength) {
-					newLength *= 2;
-				}
-
-				var newBuffer = new ArrayBuffer(newLength);
-				var newArrayView = new Uint8Array(newBuffer);
-				newArrayView.set(this.arrayView);
-
-				// If there's a gap between the end of the old buffer
-				// and the start of the new one, we need to zero it out
-				if (this.offset > this.buffer.byteLength) {
-					newArrayView.fill(0, this.buffer.byteLength, this.offset);
-				}
-
-				this.buffer = newBuffer;
-				this.dataView = new DataView(newBuffer);
-				this.arrayView = newArrayView;
+		/**
+		 * Ensures that the buffer is large enough to write `size` bytes
+		 * at the current `self.offset`. */
+		private accommodate(size: number): void {
+			var requiredLength = this.offset + size;
+			if (this.buffer.byteLength >= requiredLength) {
+				return;
 			}
 
-			private write(dataType: 'Int8' | 'Uint8' | 'Int16' | 'Int32' | 'Float32' | 'Float64', size: number, value: any): this {
-				this.accommodate(size);
-				this.dataView[`set${dataType}`](this.offset, value);
-				this.offset += size;
-				return this;
+			var newLength = this.buffer.byteLength;
+			while (newLength < requiredLength) {
+				newLength *= 2;
 			}
 
-			/**
-			 * Returns the writen data as a slice from the internal buffer,
-			 * cutting off any padding at the end.
-			 *
-			 * @returns a [0, offset] slice of the interal buffer
-			*/
-			getData(): ArrayBuffer {
-				this.accommodate(0); /* make sure the offset is inside the buffer */
-				return this.buffer.slice(0, this.offset);
-			};
+			var newBuffer = new ArrayBuffer(newLength);
+			var newArrayView = new Uint8Array(newBuffer);
+			newArrayView.set(this.arrayView);
 
-			/**
-			 * @param value a signed byte
-			*/
-			byte(value: ByteTag["value"]): this {
-				this.write('Int8', 1, value);
-				return this;
+			// If there's a gap between the end of the old buffer
+			// and the start of the new one, we need to zero it out
+			if (this.offset > this.buffer.byteLength) {
+				newArrayView.fill(0, this.buffer.byteLength, this.offset);
 			}
 
-			declare [tagTypes.byte]: typeof this.byte;
+			this.buffer = newBuffer;
+			this.dataView = new DataView(newBuffer);
+			this.arrayView = newArrayView;
+		}
 
-			/**
-			 * @param value an unsigned byte
-			*/
-			ubyte(value: number): this {
-				this.write('Uint8', 1, value);
-				return this;
+		private write(dataType: WriterDataType, size: number, value: number): this {
+			this.accommodate(size);
+			this.dataView[`set${dataType}`](this.offset, value);
+			this.offset += size;
+			return this;
+		}
+
+		/**
+		 * Returns the writen data as a slice from the internal buffer,
+		 * cutting off any padding at the end.
+		 *
+		 * @returns a [0, offset] slice of the interal buffer */
+		getData(): ArrayBuffer {
+			this.accommodate(0);  /* make sure the offset is inside the buffer */
+			return this.buffer.slice(0, this.offset);
+		};
+
+		/**
+		 * @method module:nbt.Writer#byte
+		 * @param {number} value - a signed byte
+		 * @returns {module:nbt.Writer} itself */
+		[nbt.tagTypes.byte] = this.write.bind(this, 'Int8', 1);
+		byte = this[tagTypes["byte"]];
+
+		/**
+		 * @method module:nbt.Writer#ubyte
+		 * @param {number} value - an unsigned byte
+		 * @returns {module:nbt.Writer} itself */
+		ubyte = this.write.bind(this, 'Uint8', 1);
+
+		/**
+		 * @method module:nbt.Writer#short
+		 * @param {number} value - a signed 16-bit integer
+		 * @returns {module:nbt.Writer} itself */
+		[nbt.tagTypes.short] = this.write.bind(this, 'Int16', 2);
+		short = this[tagTypes["short"]];
+
+		/**
+		 * @method module:nbt.Writer#int
+		 * @param {number} value - a signed 32-bit integer
+		 * @returns {module:nbt.Writer} itself */
+		[nbt.tagTypes.int] = this.write.bind(this, 'Int32', 4);
+		int = this[tagTypes["int"]];
+
+		/**
+		 * @method module:nbt.Writer#float
+		 * @param {number} value - a signed 32-bit float
+		 * @returns {module:nbt.Writer} itself */
+		[nbt.tagTypes.float] = this.write.bind(this, 'Float32', 4);
+		float = this[tagTypes["float"]];
+
+		/**
+		 * @method module:nbt.Writer#float
+		 * @param {number} value - a signed 64-bit float
+		 * @returns {module:nbt.Writer} itself */
+		[nbt.tagTypes.double] = this.write.bind(this, 'Float64', 8);
+		double = this[tagTypes["float"]];
+
+		/**
+		 * As JavaScript does not support 64-bit integers natively, this
+		 * method takes an array of two 32-bit integers that make up the
+		 * upper and lower halves of the long.
+		 *
+		 * @method module:nbt.Writer#long
+		 * @param {Array.<number>} value - [upper, lower]
+		 * @returns {module:nbt.Writer} itself */
+		[nbt.tagTypes.long](value: LongTag["value"]): this {
+			this.int(value[0]);
+			this.int(value[1]);
+			return this;
+		};
+		long = this[tagTypes["long"]];
+
+		/**
+		 * @method module:nbt.Writer#byteArray
+		 * @param {Array.<number>|Uint8Array|Buffer} value
+		 * @returns {module:nbt.Writer} itself */
+		[nbt.tagTypes.byteArray](value: ByteArrayTag["value"] | Uint8Array): this {
+			this.int(value.length);
+			this.accommodate(value.length);
+			this.arrayView.set(value, this.offset);
+			this.offset += value.length;
+			return this;
+		};
+		byteArray = this[tagTypes["byteArray"]];
+
+		/**
+		 * @method module:nbt.Writer#intArray
+		 * @param {Array.<number>} value
+		 * @returns {module:nbt.Writer} itself */
+		[nbt.tagTypes.intArray](value: IntArrayTag["value"]): this {
+			this.int(value.length);
+			var i;
+			for (i = 0; i < value.length; i++) {
+				this.int(value[i]!);
 			}
+			return this;
+		};
+		intArray = this[tagTypes["intArray"]];
 
-			// declare [tagTypes.ubyte]: typeof this.ubyte;
-
-			/**
-			 * @param value a signed 16-bit integer
-			*/
-			short(value: ShortTag["value"]): this {
-				this.write('Int16', 2, value);
-				return this;
+		/**
+		 * @method module:nbt.Writer#longArray
+		 * @param {Array.<number>} value
+		 * @returns {module:nbt.Writer} itself */
+		[nbt.tagTypes.longArray](value: LongArrayTag["value"]): this {
+			this.int(value.length);
+			var i;
+			for (i = 0; i < value.length; i++) {
+				this.long(value[i]!);
 			}
+			return this;
+		};
+		longArray = this[tagTypes["longArray"]];
 
-			declare [tagTypes.short]: typeof this.short;
+		/**
+		 * @method module:nbt.Writer#string
+		 * @param {string} value
+		 * @returns {module:nbt.Writer} itself */
+		[nbt.tagTypes.string](value: StringTag["value"]): this {
+			var bytes = encodeUTF8(value);
+			this.short(bytes.length);
+			this.accommodate(bytes.length);
+			this.arrayView.set(bytes, this.offset);
+			this.offset += bytes.length;
+			return this;
+		};
+		string = this[tagTypes["string"]];
 
-			/**
-			 * @param value a signed 32-bit integer
-			*/
-			int(value: IntTag["value"]): this {
-				this.write('Int32', 4, value);
-				return this;
+		/**
+		 * @method module:nbt.Writer#list
+		 * @param {Object} value
+		 * @param {number} value.type - the NBT type number
+		 * @param {Array} value.value - an array of values
+		 * @returns {module:nbt.Writer} itself */
+		[nbt.tagTypes.list](value: ListTag["value"]): this {
+			this.byte(nbt.tagTypes[value.type]);
+			this.int(value.value.length);
+			var i;
+			for (i = 0; i < value.value.length; i++) {
+				// @ts-expect-error
+				this[value.type](value.value[i]);
 			}
+			return this;
+		};
+		list = this[tagTypes["list"]];
 
-			declare [tagTypes.int]: typeof this.int;
-
-			/**
-			 * @param value a signed 32-bit float
-			*/
-			float(value: FloatTag["value"]): this {
-				this.write('Float32', 4, value);
-				return this;
-			}
-
-			declare [tagTypes.float]: typeof this.float;
-
-			/**
-			 * @param value a signed 64-bit float
-			*/
-			double(value: DoubleTag["value"]): this {
-				this.write('Float64', 8, value);
-				return this;
-			}
-
-			declare [tagTypes.double]: typeof this.double;
-
-			/**
-			 * As JavaScript does not support 64-bit integers natively, this
-			 * method takes an array of two 32-bit integers that make up the
-			 * upper and lower halves of the long.
-			 *
-			 * @param value [upper, lower]
-			*/
-			long(value: LongTag["value"]): this {
-				this.int(value[0]);
-				this.int(value[1]);
-				return this;
-			};
-
-			declare [tagTypes.long]: typeof this.long;
-
-			byteArray(value: ByteArrayTag["value"]): this {
-				this.int(value.length);
-				this.accommodate(value.length);
-				this.arrayView.set(value, this.offset);
-				this.offset += value.length;
-				return this;
-			};
-
-			declare [tagTypes.byteArray]: typeof this.byteArray;
-
-			intArray(value: IntArrayTag["value"]): this {
-				this.int(value.length);
-				var i;
-				for (i = 0; i < value.length; i++) {
-					this.int(value[i]!);
-				}
-				return this;
-			};
-
-			declare [tagTypes.intArray]: typeof this.intArray;
-
-			longArray(value: LongArrayTag["value"]): this {
-				this.int(value.length);
-				var i;
-				for (i = 0; i < value.length; i++) {
-					this.long(value[i]!);
-				}
-				return this;
-			};
-
-			declare [tagTypes.longArray]: typeof this.longArray;
-
-			string(value: StringTag["value"]): this {
-				var bytes = encodeUTF8(value);
-				this.short(bytes.length);
-				this.accommodate(bytes.length);
-				this.arrayView.set(bytes, this.offset);
-				this.offset += bytes.length;
-				return this;
-			};
-
-			declare [tagTypes.string]: typeof this.string;
-
-			/**
-			 * @param value.type the NBT type number
-			 * @param value.value an array of values
-			*/
-			list(value: ListTag["value"]): this {
-				this.byte(tagTypes[value.type]);
-				this.int(value.value.length);
-				var i;
-				for (i = 0; i < value.value.length; i++) {
-					// @ts-expect-error
-					this[value.type](value.value[i]);
-				}
-				return this;
-			};
-
-			declare [tagTypes.list]: typeof this.list;
-
-			/**
-			 * @param value a key/value map
-			 * @param value.KEY.type the NBT type number
-			 * @param value.KEY.value a value matching the type
-			 *
-			 * @example
-			 * writer.compound({
-			 *     foo: { type: 'int', value: 12 },
-			 *     bar: { type: 'string', value: 'Hello, World!' }
-			 * });
-			*/
-			compound(value: CompoundTag["value"]): this {
-				Object.keys(value).map(key => {
-					this.byte(tagTypes[value[key]!.type as TagTypeName]);
-					this.string(key);
-					// @ts-expect-error
-					this[value[key].type as Exclude<TagTypeName,"end">](value[key].value as Tag);
-				});
-				this.byte(tagTypes.end);
-				return this;
-			}
-
-			declare [tagTypes.compound]: typeof this.compound;
+		/**
+		 * @method module:nbt.Writer#compound
+		 * @param {Object} value - a key/value map
+		 * @param {Object} value.KEY
+		 * @param {string} value.KEY.type - the NBT type number
+		 * @param {Object} value.KEY.value - a value matching the type
+		 * @returns {module:nbt.Writer} itself
+		 *
+		 * @example
+		 * writer.compound({
+		 *     foo: { type: 'int', value: 12 },
+		 *     bar: { type: 'string', value: 'Hello, World!' }
+		 * }); */
+		[nbt.tagTypes.compound](value: CompoundTag["value"]): this {
+			var self = this;
+			Object.keys(value).map(function (key) {
+				self.byte(nbt.tagTypes[value[key]!.type]);
+				self.string(key);
+				// @ts-expect-error
+				self[value[key].type as Exclude<TagTypeName,"end">](value[key].value as Tag);
+			});
+			this.byte(nbt.tagTypes.end);
+			return this;
+		};
+		compound = this[tagTypes["compound"]];
 	};
 
 	/**

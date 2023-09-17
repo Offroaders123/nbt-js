@@ -121,102 +121,120 @@ export declare namespace nbt {
      *
      * return writer.buffer; */
     export class Writer {
-        /**
-         * Will be resized (x2) on write if necessary.
-        */
-        private buffer;
-        /**
-         * This is recreated when the buffer is.
-        */
-        private dataView;
-        /**
-         * This is recreated when the buffer is.
-        */
-        private arrayView;
+        /** Will be resized (x2) on write if necessary. */
+        buffer: ArrayBuffer;
+        /** This is recreated when the buffer is */
+        dataView: DataView;
+        /** This is recreated when the buffer is */
+        arrayView: Uint8Array;
         /**
          * The location in the buffer where bytes are written or read.
          * This increases after every write, but can be freely changed.
-         * The buffer will be resized when necessary.
-        */
-        private offset;
+         * The buffer will be resized when necessary.  */
+        offset: number;
         /**
          * Ensures that the buffer is large enough to write `size` bytes
-         * at the current `this.offset`.
-        */
+         * at the current `self.offset`. */
         private accommodate;
         private write;
         /**
          * Returns the writen data as a slice from the internal buffer,
          * cutting off any padding at the end.
          *
-         * @returns a [0, offset] slice of the interal buffer
-        */
+         * @returns a [0, offset] slice of the interal buffer */
         getData(): ArrayBuffer;
         /**
-         * @param value a signed byte
-        */
-        byte(value: ByteTag["value"]): this;
-        [tagTypes.byte]: typeof this.byte;
+         * @method module:nbt.Writer#byte
+         * @param {number} value - a signed byte
+         * @returns {module:nbt.Writer} itself */
+        [nbt.tagTypes.byte]: (value: number) => this;
+        byte: (value: number) => this;
         /**
-         * @param value an unsigned byte
-        */
-        ubyte(value: number): this;
+         * @method module:nbt.Writer#ubyte
+         * @param {number} value - an unsigned byte
+         * @returns {module:nbt.Writer} itself */
+        ubyte: (value: number) => this;
         /**
-         * @param value a signed 16-bit integer
-        */
-        short(value: ShortTag["value"]): this;
-        [tagTypes.short]: typeof this.short;
+         * @method module:nbt.Writer#short
+         * @param {number} value - a signed 16-bit integer
+         * @returns {module:nbt.Writer} itself */
+        [nbt.tagTypes.short]: (value: number) => this;
+        short: (value: number) => this;
         /**
-         * @param value a signed 32-bit integer
-        */
-        int(value: IntTag["value"]): this;
-        [tagTypes.int]: typeof this.int;
+         * @method module:nbt.Writer#int
+         * @param {number} value - a signed 32-bit integer
+         * @returns {module:nbt.Writer} itself */
+        [nbt.tagTypes.int]: (value: number) => this;
+        int: (value: number) => this;
         /**
-         * @param value a signed 32-bit float
-        */
-        float(value: FloatTag["value"]): this;
-        [tagTypes.float]: typeof this.float;
+         * @method module:nbt.Writer#float
+         * @param {number} value - a signed 32-bit float
+         * @returns {module:nbt.Writer} itself */
+        [nbt.tagTypes.float]: (value: number) => this;
+        float: (value: number) => this;
         /**
-         * @param value a signed 64-bit float
-        */
-        double(value: DoubleTag["value"]): this;
-        [tagTypes.double]: typeof this.double;
+         * @method module:nbt.Writer#float
+         * @param {number} value - a signed 64-bit float
+         * @returns {module:nbt.Writer} itself */
+        [nbt.tagTypes.double]: (value: number) => this;
+        double: (value: number) => this;
         /**
          * As JavaScript does not support 64-bit integers natively, this
          * method takes an array of two 32-bit integers that make up the
          * upper and lower halves of the long.
          *
-         * @param value [upper, lower]
-        */
-        long(value: LongTag["value"]): this;
-        [tagTypes.long]: typeof this.long;
-        byteArray(value: ByteArrayTag["value"]): this;
-        [tagTypes.byteArray]: typeof this.byteArray;
-        intArray(value: IntArrayTag["value"]): this;
-        [tagTypes.intArray]: typeof this.intArray;
-        longArray(value: LongArrayTag["value"]): this;
-        [tagTypes.longArray]: typeof this.longArray;
-        string(value: StringTag["value"]): this;
-        [tagTypes.string]: typeof this.string;
+         * @method module:nbt.Writer#long
+         * @param {Array.<number>} value - [upper, lower]
+         * @returns {module:nbt.Writer} itself */
+        [nbt.tagTypes.long](value: LongTag["value"]): this;
+        long: (value: LongTag["value"]) => this;
         /**
-         * @param value.type the NBT type number
-         * @param value.value an array of values
-        */
-        list(value: ListTag["value"]): this;
-        [tagTypes.list]: typeof this.list;
+         * @method module:nbt.Writer#byteArray
+         * @param {Array.<number>|Uint8Array|Buffer} value
+         * @returns {module:nbt.Writer} itself */
+        [nbt.tagTypes.byteArray](value: ByteArrayTag["value"] | Uint8Array): this;
+        byteArray: (value: ByteArrayTag["value"] | Uint8Array) => this;
         /**
-         * @param value a key/value map
-         * @param value.KEY.type the NBT type number
-         * @param value.KEY.value a value matching the type
+         * @method module:nbt.Writer#intArray
+         * @param {Array.<number>} value
+         * @returns {module:nbt.Writer} itself */
+        [nbt.tagTypes.intArray](value: IntArrayTag["value"]): this;
+        intArray: (value: IntArrayTag["value"]) => this;
+        /**
+         * @method module:nbt.Writer#longArray
+         * @param {Array.<number>} value
+         * @returns {module:nbt.Writer} itself */
+        [nbt.tagTypes.longArray](value: LongArrayTag["value"]): this;
+        longArray: (value: LongArrayTag["value"]) => this;
+        /**
+         * @method module:nbt.Writer#string
+         * @param {string} value
+         * @returns {module:nbt.Writer} itself */
+        [nbt.tagTypes.string](value: StringTag["value"]): this;
+        string: (value: StringTag["value"]) => this;
+        /**
+         * @method module:nbt.Writer#list
+         * @param {Object} value
+         * @param {number} value.type - the NBT type number
+         * @param {Array} value.value - an array of values
+         * @returns {module:nbt.Writer} itself */
+        [nbt.tagTypes.list](value: ListTag["value"]): this;
+        list: (value: ListTag["value"]) => this;
+        /**
+         * @method module:nbt.Writer#compound
+         * @param {Object} value - a key/value map
+         * @param {Object} value.KEY
+         * @param {string} value.KEY.type - the NBT type number
+         * @param {Object} value.KEY.value - a value matching the type
+         * @returns {module:nbt.Writer} itself
          *
          * @example
          * writer.compound({
          *     foo: { type: 'int', value: 12 },
          *     bar: { type: 'string', value: 'Hello, World!' }
-         * });
-        */
-        compound(value: CompoundTag["value"]): this;
-        [tagTypes.compound]: typeof this.compound;
+         * }); */
+        [nbt.tagTypes.compound](value: CompoundTag["value"]): this;
+        compound: (value: CompoundTag["value"]) => this;
     }
     /**
      * In addition to the named writing methods documented below,
