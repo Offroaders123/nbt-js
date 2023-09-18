@@ -308,8 +308,8 @@ export namespace nbt {
 		/**
 		 * @param value - a signed byte
 		 * @returns itself */
-		[nbt.tagTypes.byte] = this.write.bind(this, 'Int8', 1);
 		byte = this[tagTypes["byte"]];
+		[nbt.tagTypes.byte] = this.write.bind(this, 'Int8', 1);
 
 		/**
 		 * @param value - an unsigned byte
@@ -319,26 +319,26 @@ export namespace nbt {
 		/**
 		 * @param value - a signed 16-bit integer
 		 * @returns itself */
-		[nbt.tagTypes.short] = this.write.bind(this, 'Int16', 2);
 		short = this[tagTypes["short"]];
+		[nbt.tagTypes.short] = this.write.bind(this, 'Int16', 2);
 
 		/**
 		 * @param value - a signed 32-bit integer
 		 * @returns itself */
-		[nbt.tagTypes.int] = this.write.bind(this, 'Int32', 4);
 		int = this[tagTypes["int"]];
+		[nbt.tagTypes.int] = this.write.bind(this, 'Int32', 4);
 
 		/**
 		 * @param value - a signed 32-bit float
 		 * @returns itself */
-		[nbt.tagTypes.float] = this.write.bind(this, 'Float32', 4);
 		float = this[tagTypes["float"]];
+		[nbt.tagTypes.float] = this.write.bind(this, 'Float32', 4);
 
 		/**
 		 * @param value - a signed 64-bit float
 		 * @returns itself */
-		[nbt.tagTypes.double] = this.write.bind(this, 'Float64', 8);
 		double = this[tagTypes["float"]];
+		[nbt.tagTypes.double] = this.write.bind(this, 'Float64', 8);
 
 		/**
 		 * As JavaScript does not support 64-bit integers natively, this
@@ -347,15 +347,16 @@ export namespace nbt {
 		 *
 		 * @param value - [upper, lower]
 		 * @returns itself */
+		long = this[tagTypes["long"]];
 		[nbt.tagTypes.long](value: LongTag["value"]): this {
 			this.int(value[0]);
 			this.int(value[1]);
 			return this;
 		};
-		long = this[tagTypes["long"]];
 
 		/**
 		 * @returns itself */
+		byteArray = this[tagTypes["byteArray"]];
 		[nbt.tagTypes.byteArray](value: ByteArrayTag["value"] | Uint8Array): this {
 			this.int(value.length);
 			this.accommodate(value.length);
@@ -363,10 +364,10 @@ export namespace nbt {
 			this.offset += value.length;
 			return this;
 		};
-		byteArray = this[tagTypes["byteArray"]];
 
 		/**
 		 * @returns itself */
+		intArray = this[tagTypes["intArray"]];
 		[nbt.tagTypes.intArray](value: IntArrayTag["value"]): this {
 			this.int(value.length);
 			var i;
@@ -375,10 +376,10 @@ export namespace nbt {
 			}
 			return this;
 		};
-		intArray = this[tagTypes["intArray"]];
 
 		/**
 		 * @returns itself */
+		longArray = this[tagTypes["longArray"]];
 		[nbt.tagTypes.longArray](value: LongArrayTag["value"]): this {
 			this.int(value.length);
 			var i;
@@ -387,10 +388,10 @@ export namespace nbt {
 			}
 			return this;
 		};
-		longArray = this[tagTypes["longArray"]];
 
 		/**
 		 * @returns itself */
+		string = this[tagTypes["string"]];
 		[nbt.tagTypes.string](value: StringTag["value"]): this {
 			var bytes = encodeUTF8(value);
 			this.short(bytes.length);
@@ -399,13 +400,13 @@ export namespace nbt {
 			this.offset += bytes.length;
 			return this;
 		};
-		string = this[tagTypes["string"]];
 
 		/**
 		 * @param value
 		 * @param value.type - the NBT type number
 		 * @param value.value - an array of values
 		 * @returns itself */
+		list = this[tagTypes["list"]];
 		[nbt.tagTypes.list](value: ListTag<Tag>["value"]): this {
 			this.byte(nbt.tagTypes[value.type]);
 			this.int(value.value.length);
@@ -416,7 +417,6 @@ export namespace nbt {
 			}
 			return this;
 		};
-		list = this[tagTypes["list"]];
 
 		/**
 		 * @param value - a key/value map
@@ -430,6 +430,7 @@ export namespace nbt {
 		 *     foo: { type: 'int', value: 12 },
 		 *     bar: { type: 'string', value: 'Hello, World!' }
 		 * }); */
+		compound = this[tagTypes["compound"]];
 		[nbt.tagTypes.compound](value: CompoundTag["value"]): this {
 			var self = this;
 			Object.keys(value).map(function (key) {
@@ -441,7 +442,6 @@ export namespace nbt {
 			this.byte(nbt.tagTypes.end);
 			return this;
 		};
-		compound = this[tagTypes["compound"]];
 	};
 
 	export type ReaderDataType = {
@@ -485,8 +485,8 @@ export namespace nbt {
 
 		/**
 		 * @returns the read byte */
-		[nbt.tagTypes.byte] = this.read.bind(this, 'Int8', 1);
 		byte = this[tagTypes.byte];
+		[nbt.tagTypes.byte] = this.read.bind(this, 'Int8', 1);
 
 		/**
 		 * @returns the read unsigned byte */
@@ -494,23 +494,23 @@ export namespace nbt {
 
 		/**
 		 * @returns the read signed 16-bit short  */
-		[nbt.tagTypes.short] = this.read.bind(this, 'Int16', 2);
 		short = this[tagTypes.short];
+		[nbt.tagTypes.short] = this.read.bind(this, 'Int16', 2);
 
 		/**
 		 * @returns the read signed 32-bit integer */
-		[nbt.tagTypes.int] = this.read.bind(this, 'Int32', 4);
 		int = this[tagTypes.int];
+		[nbt.tagTypes.int] = this.read.bind(this, 'Int32', 4);
 
 		/**
 		 * @returns the read signed 32-bit float */
-		[nbt.tagTypes.float] = this.read.bind(this, 'Float32', 4);
 		float = this[tagTypes.float];
+		[nbt.tagTypes.float] = this.read.bind(this, 'Float32', 4);
 
 		/**
 		 * @returns the read signed 64-bit float */
-		[nbt.tagTypes.double] = this.read.bind(this, 'Float64', 8);
 		double = this[tagTypes.double];
+		[nbt.tagTypes.double] = this.read.bind(this, 'Float64', 8);
 
 		/**
 		 * As JavaScript does not not natively support 64-bit
@@ -518,13 +518,14 @@ export namespace nbt {
 		 * 32-bit integers, the upper and the lower.
 		 *
 		 * @returns [upper, lower] */
+		long = this[tagTypes.long];
 		[nbt.tagTypes.long](): LongTag["value"] {
 			return [this.int(), this.int()];
 		};
-		long = this[tagTypes.long];
 
 		/**
 		 * @returns the read array */
+		byteArray = this[tagTypes.byteArray];
 		[nbt.tagTypes.byteArray](): ByteArrayTag["value"] {
 			var length = this.int();
 			var bytes = [];
@@ -534,10 +535,10 @@ export namespace nbt {
 			}
 			return bytes;
 		};
-		byteArray = this[tagTypes.byteArray];
 
 		/**
 		 * @returns the read array of 32-bit ints */
+		intArray = this[tagTypes.intArray];
 		[nbt.tagTypes.intArray](): IntArrayTag["value"] {
 			var length = this.int();
 			var ints = [];
@@ -547,7 +548,6 @@ export namespace nbt {
 			}
 			return ints;
 		};
-		intArray = this[tagTypes.intArray];
 
 		/**
 		 * As JavaScript does not not natively support 64-bit
@@ -556,6 +556,7 @@ export namespace nbt {
 		 *
 		 * @returns the read array of 64-bit ints
 		 *     split into [upper, lower] */
+		longArray = this[tagTypes.longArray];
 		[nbt.tagTypes.longArray](): LongArrayTag["value"] {
 			var length = this.int();
 			var longs = [];
@@ -565,10 +566,10 @@ export namespace nbt {
 			}
 			return longs;
 		};
-		longArray = this[tagTypes.longArray];
 
 		/**
 		 * @returns the read string */
+		string = this[tagTypes.string];
 		[nbt.tagTypes.string](): StringTag["value"] {
 			var length = this.short();
 			var slice = sliceUint8Array(this.arrayView, this.offset,
@@ -576,12 +577,12 @@ export namespace nbt {
 			this.offset += length;
 			return decodeUTF8(slice);
 		};
-		string = this[tagTypes.string];
 
 		/**
 		 * @example
 		 * reader.list();
 		 * // -> { type: 'string', values: ['foo', 'bar'] } */
+		list = this[tagTypes.list];
 		[nbt.tagTypes.list](): ListTag<Tag>["value"] {
 			var type = this.byte() as TagType;
 			var length = this.int();
@@ -592,13 +593,13 @@ export namespace nbt {
 			}
 			return { type: nbt.tagTypeNames[type] as Exclude<TagTypeName,tagTypeNames["0"]>, value: values };
 		};
-		list = this[tagTypes.list];
 
 		/**
 		 * @example
 		 * reader.compound();
 		 * // -> { foo: { type: int, value: 42 },
 		 * //      bar: { type: string, value: 'Hello! }} */
+		compound = this[tagTypes.compound];
 		[nbt.tagTypes.compound](): CompoundTag["value"] {
 			var values: CompoundTag["value"] = {};
 			while (true) {
@@ -613,7 +614,6 @@ export namespace nbt {
 			}
 			return values;
 		};
-		compound = this[tagTypes.compound];
 	};
 
 	/**
@@ -738,4 +738,4 @@ export namespace nbt {
 			});
 		}
 	};
-};
+}
