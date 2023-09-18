@@ -306,43 +306,37 @@ export namespace nbt {
 		};
 
 		/**
-		 * @method module:nbt.Writer#byte
-		 * @param {number} value - a signed byte
-		 * @returns {module:nbt.Writer} itself */
+		 * @param value - a signed byte
+		 * @returns itself */
 		[nbt.tagTypes.byte] = this.write.bind(this, 'Int8', 1);
 		byte = this[tagTypes["byte"]];
 
 		/**
-		 * @method module:nbt.Writer#ubyte
-		 * @param {number} value - an unsigned byte
-		 * @returns {module:nbt.Writer} itself */
+		 * @param value - an unsigned byte
+		 * @returns itself */
 		ubyte = this.write.bind(this, 'Uint8', 1);
 
 		/**
-		 * @method module:nbt.Writer#short
-		 * @param {number} value - a signed 16-bit integer
-		 * @returns {module:nbt.Writer} itself */
+		 * @param value - a signed 16-bit integer
+		 * @returns itself */
 		[nbt.tagTypes.short] = this.write.bind(this, 'Int16', 2);
 		short = this[tagTypes["short"]];
 
 		/**
-		 * @method module:nbt.Writer#int
-		 * @param {number} value - a signed 32-bit integer
-		 * @returns {module:nbt.Writer} itself */
+		 * @param value - a signed 32-bit integer
+		 * @returns itself */
 		[nbt.tagTypes.int] = this.write.bind(this, 'Int32', 4);
 		int = this[tagTypes["int"]];
 
 		/**
-		 * @method module:nbt.Writer#float
-		 * @param {number} value - a signed 32-bit float
-		 * @returns {module:nbt.Writer} itself */
+		 * @param value - a signed 32-bit float
+		 * @returns itself */
 		[nbt.tagTypes.float] = this.write.bind(this, 'Float32', 4);
 		float = this[tagTypes["float"]];
 
 		/**
-		 * @method module:nbt.Writer#float
-		 * @param {number} value - a signed 64-bit float
-		 * @returns {module:nbt.Writer} itself */
+		 * @param value - a signed 64-bit float
+		 * @returns itself */
 		[nbt.tagTypes.double] = this.write.bind(this, 'Float64', 8);
 		double = this[tagTypes["float"]];
 
@@ -351,9 +345,8 @@ export namespace nbt {
 		 * method takes an array of two 32-bit integers that make up the
 		 * upper and lower halves of the long.
 		 *
-		 * @method module:nbt.Writer#long
-		 * @param {Array.<number>} value - [upper, lower]
-		 * @returns {module:nbt.Writer} itself */
+		 * @param value - [upper, lower]
+		 * @returns itself */
 		[nbt.tagTypes.long](value: LongTag["value"]): this {
 			this.int(value[0]);
 			this.int(value[1]);
@@ -362,9 +355,7 @@ export namespace nbt {
 		long = this[tagTypes["long"]];
 
 		/**
-		 * @method module:nbt.Writer#byteArray
-		 * @param {Array.<number>|Uint8Array|Buffer} value
-		 * @returns {module:nbt.Writer} itself */
+		 * @returns itself */
 		[nbt.tagTypes.byteArray](value: ByteArrayTag["value"] | Uint8Array): this {
 			this.int(value.length);
 			this.accommodate(value.length);
@@ -375,9 +366,7 @@ export namespace nbt {
 		byteArray = this[tagTypes["byteArray"]];
 
 		/**
-		 * @method module:nbt.Writer#intArray
-		 * @param {Array.<number>} value
-		 * @returns {module:nbt.Writer} itself */
+		 * @returns itself */
 		[nbt.tagTypes.intArray](value: IntArrayTag["value"]): this {
 			this.int(value.length);
 			var i;
@@ -389,9 +378,7 @@ export namespace nbt {
 		intArray = this[tagTypes["intArray"]];
 
 		/**
-		 * @method module:nbt.Writer#longArray
-		 * @param {Array.<number>} value
-		 * @returns {module:nbt.Writer} itself */
+		 * @returns itself */
 		[nbt.tagTypes.longArray](value: LongArrayTag["value"]): this {
 			this.int(value.length);
 			var i;
@@ -403,9 +390,7 @@ export namespace nbt {
 		longArray = this[tagTypes["longArray"]];
 
 		/**
-		 * @method module:nbt.Writer#string
-		 * @param {string} value
-		 * @returns {module:nbt.Writer} itself */
+		 * @returns itself */
 		[nbt.tagTypes.string](value: StringTag["value"]): this {
 			var bytes = encodeUTF8(value);
 			this.short(bytes.length);
@@ -417,11 +402,10 @@ export namespace nbt {
 		string = this[tagTypes["string"]];
 
 		/**
-		 * @method module:nbt.Writer#list
-		 * @param {Object} value
-		 * @param {number} value.type - the NBT type number
-		 * @param {Array} value.value - an array of values
-		 * @returns {module:nbt.Writer} itself */
+		 * @param value
+		 * @param value.type - the NBT type number
+		 * @param value.value - an array of values
+		 * @returns itself */
 		[nbt.tagTypes.list](value: ListTag<Tag>["value"]): this {
 			this.byte(nbt.tagTypes[value.type]);
 			this.int(value.value.length);
@@ -435,12 +419,11 @@ export namespace nbt {
 		list = this[tagTypes["list"]];
 
 		/**
-		 * @method module:nbt.Writer#compound
-		 * @param {Object} value - a key/value map
-		 * @param {Object} value.KEY
-		 * @param {string} value.KEY.type - the NBT type number
-		 * @param {Object} value.KEY.value - a value matching the type
-		 * @returns {module:nbt.Writer} itself
+		 * @param value - a key/value map
+		 * @param value.KEY
+		 * @param value.KEY.type - the NBT type number
+		 * @param value.KEY.value - a value matching the type
+		 * @returns itself
 		 *
 		 * @example
 		 * writer.compound({
@@ -501,37 +484,31 @@ export namespace nbt {
 		}
 
 		/**
-		 * @method module:nbt.Reader#byte
-		 * @returns {number} the read byte */
+		 * @returns the read byte */
 		[nbt.tagTypes.byte] = this.read.bind(this, 'Int8', 1);
 		byte = this[tagTypes.byte];
 
 		/**
-		 * @method module:nbt.Reader#byte
-		 * @returns {number} the read unsigned byte */
+		 * @returns the read unsigned byte */
 		ubyte = this.read.bind(this, 'Uint8', 1);
 
 		/**
-		 * @method module:nbt.Reader#short
-		 * @returns {number} the read signed 16-bit short  */
+		 * @returns the read signed 16-bit short  */
 		[nbt.tagTypes.short] = this.read.bind(this, 'Int16', 2);
 		short = this[tagTypes.short];
 
 		/**
-		 * @method module:nbt.Reader#int
-		 * @returns {number} the read signed 32-bit integer */
+		 * @returns the read signed 32-bit integer */
 		[nbt.tagTypes.int] = this.read.bind(this, 'Int32', 4);
 		int = this[tagTypes.int];
 
 		/**
-		 * @method module:nbt.Reader#float
-		 * @returns {number} the read signed 32-bit float */
+		 * @returns the read signed 32-bit float */
 		[nbt.tagTypes.float] = this.read.bind(this, 'Float32', 4);
 		float = this[tagTypes.float];
 
 		/**
-		 * @method module:nbt.Reader#double
-		 * @returns {number} the read signed 64-bit float */
+		 * @returns the read signed 64-bit float */
 		[nbt.tagTypes.double] = this.read.bind(this, 'Float64', 8);
 		double = this[tagTypes.double];
 
@@ -540,16 +517,14 @@ export namespace nbt {
 		 * integers, the value is returned as an array of two
 		 * 32-bit integers, the upper and the lower.
 		 *
-		 * @method module:nbt.Reader#long
-		 * @returns {Array.<number>} [upper, lower] */
+		 * @returns [upper, lower] */
 		[nbt.tagTypes.long](): LongTag["value"] {
 			return [this.int(), this.int()];
 		};
 		long = this[tagTypes.long];
 
 		/**
-		 * @method module:nbt.Reader#byteArray
-		 * @returns {Array.<number>} the read array */
+		 * @returns the read array */
 		[nbt.tagTypes.byteArray](): ByteArrayTag["value"] {
 			var length = this.int();
 			var bytes = [];
@@ -562,8 +537,7 @@ export namespace nbt {
 		byteArray = this[tagTypes.byteArray];
 
 		/**
-		 * @method module:nbt.Reader#intArray
-		 * @returns {Array.<number>} the read array of 32-bit ints */
+		 * @returns the read array of 32-bit ints */
 		[nbt.tagTypes.intArray](): IntArrayTag["value"] {
 			var length = this.int();
 			var ints = [];
@@ -580,8 +554,7 @@ export namespace nbt {
 		 * integers, the value is returned as an array of arrays of two
 		 * 32-bit integers, the upper and the lower.
 		 *
-		 * @method module:nbt.Reader#longArray
-		 * @returns {Array.<number>} the read array of 64-bit ints
+		 * @returns the read array of 64-bit ints
 		 *     split into [upper, lower] */
 		[nbt.tagTypes.longArray](): LongArrayTag["value"] {
 			var length = this.int();
@@ -595,8 +568,7 @@ export namespace nbt {
 		longArray = this[tagTypes.longArray];
 
 		/**
-		 * @method module:nbt.Reader#string
-		 * @returns {string} the read string */
+		 * @returns the read string */
 		[nbt.tagTypes.string](): StringTag["value"] {
 			var length = this.short();
 			var slice = sliceUint8Array(this.arrayView, this.offset,
@@ -607,9 +579,6 @@ export namespace nbt {
 		string = this[tagTypes.string];
 
 		/**
-		 * @method module:nbt.Reader#list
-		 * @returns {{type: string, value: Array}}
-		 *
 		 * @example
 		 * reader.list();
 		 * // -> { type: 'string', values: ['foo', 'bar'] } */
@@ -626,9 +595,6 @@ export namespace nbt {
 		list = this[tagTypes.list];
 
 		/**
-		 * @method module:nbt.Reader#compound
-		 * @returns {Object.<string, { type: string, value }>}
-		 *
 		 * @example
 		 * reader.compound();
 		 * // -> { foo: { type: int, value: 42 },
