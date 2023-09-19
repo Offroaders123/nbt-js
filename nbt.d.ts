@@ -1,4 +1,5 @@
-export declare namespace nbt {
+export as namespace nbt;
+
     /**
      * A mapping from type names to NBT type numbers.
      * {@link nbt.Writer} and {@link nbt.Reader}
@@ -151,7 +152,7 @@ export declare namespace nbt {
          * @param value - a signed byte
          * @returns itself */
         byte: (value: number) => this;
-        [nbt.tagTypes.byte]: (value: number) => this;
+        [tagTypes.byte]: (value: number) => this;
         /**
          * @param value - an unsigned byte
          * @returns itself */
@@ -160,22 +161,22 @@ export declare namespace nbt {
          * @param value - a signed 16-bit integer
          * @returns itself */
         short: (value: number) => this;
-        [nbt.tagTypes.short]: (value: number) => this;
+        [tagTypes.short]: (value: number) => this;
         /**
          * @param value - a signed 32-bit integer
          * @returns itself */
         int: (value: number) => this;
-        [nbt.tagTypes.int]: (value: number) => this;
+        [tagTypes.int]: (value: number) => this;
         /**
          * @param value - a signed 32-bit float
          * @returns itself */
         float: (value: number) => this;
-        [nbt.tagTypes.float]: (value: number) => this;
+        [tagTypes.float]: (value: number) => this;
         /**
          * @param value - a signed 64-bit float
          * @returns itself */
         double: (value: number) => this;
-        [nbt.tagTypes.double]: (value: number) => this;
+        [tagTypes.double]: (value: number) => this;
         /**
          * As JavaScript does not support 64-bit integers natively, this
          * method takes an array of two 32-bit integers that make up the
@@ -184,30 +185,30 @@ export declare namespace nbt {
          * @param value - [upper, lower]
          * @returns itself */
         long: (value: LongTag["value"]) => this;
-        [nbt.tagTypes.long](value: LongTag["value"]): this;
+        [tagTypes.long](value: LongTag["value"]): this;
         /**
          * @returns itself */
         byteArray: (value: ByteArrayTag["value"] | Uint8Array) => this;
-        [nbt.tagTypes.byteArray](value: ByteArrayTag["value"] | Uint8Array): this;
+        [tagTypes.byteArray](value: ByteArrayTag["value"] | Uint8Array): this;
         /**
          * @returns itself */
         intArray: (value: IntArrayTag["value"]) => this;
-        [nbt.tagTypes.intArray](value: IntArrayTag["value"]): this;
+        [tagTypes.intArray](value: IntArrayTag["value"]): this;
         /**
          * @returns itself */
         longArray: (value: LongArrayTag["value"]) => this;
-        [nbt.tagTypes.longArray](value: LongArrayTag["value"]): this;
+        [tagTypes.longArray](value: LongArrayTag["value"]): this;
         /**
          * @returns itself */
         string: (value: StringTag["value"]) => this;
-        [nbt.tagTypes.string](value: StringTag["value"]): this;
+        [tagTypes.string](value: StringTag["value"]): this;
         /**
          * @param value
          * @param value.type - the NBT type number
          * @param value.value - an array of values
          * @returns itself */
         list: (value: ListTag<Tag>["value"]) => this;
-        [nbt.tagTypes.list](value: ListTag<Tag>["value"]): this;
+        [tagTypes.list](value: ListTag<Tag>["value"]): this;
         /**
          * @param value - a key/value map
          * @param value.KEY
@@ -221,7 +222,7 @@ export declare namespace nbt {
          *     bar: { type: 'string', value: 'Hello, World!' }
          * }); */
         compound: (value: CompoundTag["value"]) => this;
-        [nbt.tagTypes.compound](value: CompoundTag["value"]): this;
+        [tagTypes.compound](value: CompoundTag["value"]): this;
     }
     export type ReaderDataType = {
         [K in keyof DataView]: K extends `get${infer T}` ? T extends `Big${string}` ? never : T : never;
@@ -251,26 +252,26 @@ export declare namespace nbt {
         /**
          * @returns the read byte */
         byte: () => number;
-        [nbt.tagTypes.byte]: () => number;
+        [tagTypes.byte]: () => number;
         /**
          * @returns the read unsigned byte */
         ubyte: () => number;
         /**
          * @returns the read signed 16-bit short  */
         short: () => number;
-        [nbt.tagTypes.short]: () => number;
+        [tagTypes.short]: () => number;
         /**
          * @returns the read signed 32-bit integer */
         int: () => number;
-        [nbt.tagTypes.int]: () => number;
+        [tagTypes.int]: () => number;
         /**
          * @returns the read signed 32-bit float */
         float: () => number;
-        [nbt.tagTypes.float]: () => number;
+        [tagTypes.float]: () => number;
         /**
          * @returns the read signed 64-bit float */
         double: () => number;
-        [nbt.tagTypes.double]: () => number;
+        [tagTypes.double]: () => number;
         /**
          * As JavaScript does not not natively support 64-bit
          * integers, the value is returned as an array of two
@@ -278,15 +279,15 @@ export declare namespace nbt {
          *
          * @returns [upper, lower] */
         long: () => LongTag["value"];
-        [nbt.tagTypes.long](): LongTag["value"];
+        [tagTypes.long](): LongTag["value"];
         /**
          * @returns the read array */
         byteArray: () => ByteArrayTag["value"];
-        [nbt.tagTypes.byteArray](): ByteArrayTag["value"];
+        [tagTypes.byteArray](): ByteArrayTag["value"];
         /**
          * @returns the read array of 32-bit ints */
         intArray: () => IntArrayTag["value"];
-        [nbt.tagTypes.intArray](): IntArrayTag["value"];
+        [tagTypes.intArray](): IntArrayTag["value"];
         /**
          * As JavaScript does not not natively support 64-bit
          * integers, the value is returned as an array of arrays of two
@@ -295,24 +296,24 @@ export declare namespace nbt {
          * @returns the read array of 64-bit ints
          *     split into [upper, lower] */
         longArray: () => LongArrayTag["value"];
-        [nbt.tagTypes.longArray](): LongArrayTag["value"];
+        [tagTypes.longArray](): LongArrayTag["value"];
         /**
          * @returns the read string */
         string: () => StringTag["value"];
-        [nbt.tagTypes.string](): StringTag["value"];
+        [tagTypes.string](): StringTag["value"];
         /**
          * @example
          * reader.list();
          * // -> { type: 'string', values: ['foo', 'bar'] } */
         list: () => ListTag<Tag>["value"];
-        [nbt.tagTypes.list](): ListTag<Tag>["value"];
+        [tagTypes.list](): ListTag<Tag>["value"];
         /**
          * @example
          * reader.compound();
          * // -> { foo: { type: int, value: 42 },
          * //      bar: { type: string, value: 'Hello! }} */
         compound: () => CompoundTag["value"];
-        [nbt.tagTypes.compound](): CompoundTag["value"];
+        [tagTypes.compound](): CompoundTag["value"];
     }
     /**
      * @param value a named compound
@@ -377,5 +378,3 @@ export declare namespace nbt {
      *     console.log(result.value.foo);
      * }); */
     export function parse(data: ArrayBuffer | Uint8Array, callback: parseCallback): void;
-    export {};
-}
