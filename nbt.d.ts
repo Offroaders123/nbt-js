@@ -137,11 +137,6 @@ export class Writer {
     */
     offset: number;
     /**
-     * Ensures that the buffer is large enough to write `size` bytes
-     * at the current `self.offset`. */
-    private accommodate;
-    private write;
-    /**
      * Returns the writen data as a slice from the internal buffer,
      * cutting off any padding at the end.
      *
@@ -349,7 +344,7 @@ export function parseUncompressed(data: ArrayBuffer | Uint8Array): RootTag;
  * @param result.name the top-level name
  * @param result.value the top-level compound
 */
-type parseCallback = {
+export type parseCallback = {
     (error: Error, result: null): void;
     (error: null, result: RootTag): void;
 };
